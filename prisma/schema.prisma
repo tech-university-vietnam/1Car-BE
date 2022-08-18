@@ -1,0 +1,120 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String
+  password    String   
+  name        String?
+  userRole    Role     @default(USER)
+  phoneNumber String
+  dateOfBirth String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  cars Car[]
+  transactions Transaction[]
+}
+
+model Car {
+  id String @id @default(uuid())
+  owner User @relation(fields: [ownerId], references: [id])
+  ownerId String
+  description String
+  carImages String[] @default([])
+  carName String
+  carType CarType @relation(fields: [carTypeId], references: [id])
+  carTypeId String @default(uuid())
+  brand Brand @relation(fields: [brandId], references: [id])
+  brandId String
+  bookings Booking[]
+  carSpecifications CarSpecification[]
+}
+
+model CarType {
+  id String @id @default(uuid())
+  description String?
+  cars Car[]
+}
+
+model Brand {
+  id String @id @default(uuid())
+  brandName String
+  cars Car[]
+}
+
+model CarSpecification {
+  id String @id @default(uuid())
+  car Car @relation(fields: [carId], references: [id])
+  carId String
+}
+
+model Booking {
+  id String @id @default(uuid())
+  userId String
+  car Car @relation(fields: [carId], references: [id])
+  carId String
+  receiveDateTime DateTime @default(now())
+  returnDateTime DateTime
+  pickUpLocation Location @relation(fields: [pickUpLocationId], references: [id])
+  pickUpLocationId String
+  totalPrice Decimal
+  transactionId String
+  bookingStatus BookingStatus @default(PENDING)
+  pickUpStatus PickupStatus @default(PENDING)
+}
+
+model Transaction {
+  id String @id @default(uuid())
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  transactionStatus TransactionStatus @default(PENDING)
+  stripePaymentId String
+  amount Decimal
+  createdAt DateTime @default(now())
+}
+
+model BookedRecord {
+  date DateTime @unique @id
+  bookedCars String[] @default([])
+}
+
+model Location {
+  id String @id @default(uuid())
+  longitude String
+  latitude String
+  bookings Booking[]
+  district String?
+  city String?
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum PickupStatus {
+  PENDING
+  PICKUP
+  RETURNED
+}
