@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { CreatePaymentDTO } from './payment.dto';
-import { Payment } from './payment.entity';
-import { PaymentService } from './payment.service';
+import { CreatePaymentDTO } from '../models/payment.dto';
+import { Payment } from '../models/payment.entity';
+import { PaymentService } from '../services/payment.service';
 
 @Controller('payment')
 @ApiTags('payment')

@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { CreateCarDTO } from './car.dto';
-import { Car } from './car.entity';
-import { CarService } from './car.service';
+import { CreateCarDTO } from '../models/car.dto';
+import { Car } from '../models/car.entity';
+import { CarService } from '../services/car.service';
 
 @Controller('car')
 @ApiTags('car')

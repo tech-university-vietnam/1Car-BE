@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { CreateBookingDTO } from './booking.dto';
-import { Booking } from './booking.entity';
-import { BookingService } from './booking.service';
+import { Booking } from '../models/booking.entity';
+import { CreateBookingDTO } from '../models/booking.dto';
+import { BookingService } from '../services/booking.service';
 
 @Controller('booking')
 @ApiTags('booking')
