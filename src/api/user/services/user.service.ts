@@ -22,8 +22,11 @@ export class UserService {
   }
 
   public getUserByEmail(email: string): Promise<User | undefined> {
-    return this.repository.createQueryBuilder('user')
-      .where("user.email == :email and user.isDeleted is not false", { enail: email })
-      .getOne();
+    return this.repository.findOne({
+      where: {
+        email: email,
+        isDeleted: false,
+      },
+    });
   }
 }
