@@ -36,11 +36,11 @@ export class Booking {
   @JoinColumn()
   car: Car;
 
-  @Column('datetime')
+  @Column('date')
   @ApiProperty()
   public receivedDateTime: string;
 
-  @Column('datetime')
+  @Column('date')
   @ApiProperty()
   public returnDateTime: string;
 
