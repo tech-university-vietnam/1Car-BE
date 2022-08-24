@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   OneToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { User } from '../../user/models/user.entity';
 import { Car } from '../../car/models/car.entity';
@@ -28,13 +29,11 @@ export class Booking {
   @ApiProperty()
   public id!: string;
 
-  @OneToOne(() => User)
-  @JoinColumn()
-  user: User;
+  @Column('uuid')
+  userId: string;
 
-  @OneToOne(() => Car)
-  @JoinColumn()
-  car: Car;
+  @Column('uuid')
+  carId: string;
 
   @Column('date')
   @ApiProperty()
