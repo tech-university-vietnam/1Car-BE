@@ -1,0 +1,12 @@
+[
+  {
+    "name": "New Car 1",
+    "description": "New Car",
+    "carType": "3a48e71b-fca9-4c49-9590-a099fead5276",
+    "carSize": "a2ef5d19-2615-465c-8663-d00094709dab",
+    "carBrand": "477004fa-bcb1-4abd-83ee-c99175532c17",
+    "pricePerDate": 100,
+    "images": ["images1.png"],
+    "status": "AVAILABLE"
+  }
+]
