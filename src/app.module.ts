@@ -14,15 +14,15 @@ import { RolesGuard } from './api/roles/roles.guard';
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     ApiModule,
-    RolesModule
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass: RolesGuard
-    }
+      useClass: RolesGuard,
+    },
   ],
 })
 export class AppModule {}

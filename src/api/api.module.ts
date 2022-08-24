@@ -6,12 +6,6 @@ import { CarModule } from './car/car.module';
 import { BookingModule } from './booking/booking.module';
 
 @Module({
-  imports: [
-    UserModule,
-    PaymentModule,
-    CarModule,
-    BookingModule,
-    RolesModule,
-  ],
+  imports: [UserModule, PaymentModule, CarModule, BookingModule, RolesModule],
 })
 export class ApiModule {}
