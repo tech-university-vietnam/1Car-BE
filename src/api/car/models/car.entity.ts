@@ -5,7 +5,10 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
+import { User } from '../../user/models/user.entity';
 
 export enum carStatus {
   AVAILABLE = 'AVAILABLE',
@@ -18,9 +21,9 @@ export class Car {
   @ApiProperty()
   public id!: string;
 
-  @Column({ type: 'varchar', length: 120 })
-  @ApiProperty()
-  public ownerId: string;
+  @OneToOne(() => User)
+  @JoinColumn()
+  owner: User;
 
   @Column({ type: 'varchar', length: 300 })
   @ApiProperty()
@@ -49,7 +52,6 @@ export class Car {
   @Column({
     type: 'enum',
     enum: carStatus,
-    default: carStatus.UNAVAILABLE,
   })
   @ApiProperty()
   public status: carStatus;
