@@ -1,17 +1,10 @@
 import { Module } from '@nestjs/common';
-import { RolesModule } from './roles/roles.module';
 import { UserModule } from './user/user.module';
 import { PaymentModule } from './payment/payment.module';
 import { CarModule } from './car/car.module';
 import { BookingModule } from './booking/booking.module';
 
 @Module({
-  imports: [
-    UserModule,
-    PaymentModule,
-    CarModule,
-    BookingModule,
-    RolesModule,
-  ],
+  imports: [UserModule, PaymentModule, CarModule, BookingModule],
 })
 export class ApiModule {}
