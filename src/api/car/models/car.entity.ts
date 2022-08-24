@@ -13,6 +13,11 @@ import { CarBrand } from './carBrand.entity';
 import { CarSize } from './carSize.entity';
 import { CarType } from './carType.entity';
 
+export enum carStatus {
+  AVAILABLE = 'AVAILABLE',
+  UNAVAILABLE = 'UNAVAILABLE',
+}
+
 @Entity()
 export class Car {
   @PrimaryGeneratedColumn('uuid')
