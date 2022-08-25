@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import { Readable } from 'stream';
 import { CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CarService } from '../services/car.service';
@@ -18,6 +29,12 @@ export class CarController {
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.service.uploadImage(file.buffer);
   }
 
   @Post()

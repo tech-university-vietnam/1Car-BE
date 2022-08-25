@@ -1,6 +1,7 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import * as path from 'path';
 import { DataSource } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
@@ -9,6 +10,11 @@ import { CarBrand } from '../models/carBrand.entity';
 import { CarSize } from '../models/carSize.entity';
 import { CarType } from '../models/carType.entity';
 import { CarService } from './car.service';
+import * as fs from 'fs';
+import axios from 'axios';
+import { BadGatewayException, BadRequestException } from '@nestjs/common';
+
+jest.mock('axios');
 
 describe('CarService', () => {
   let moduleRef: TestingModule;
@@ -47,9 +53,74 @@ describe('CarService', () => {
 
   afterEach(async () => {
     await moduleRef.close();
+    jest.clearAllMocks();
   });
 
   it('should return an array of cars', async () => {
     expect(await carService.getAllCar()).toHaveLength(1);
+  });
+
+  it('should get the file and return response', async () => {
+    (axios.post as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          data: {
+            id: 'SR55YbS',
+            title: 'image',
+            url_viewer: 'https://ibb.co/SR55YbS',
+            url: 'https://i.ibb.co/72jjMPh/image.png',
+            display_url: 'https://i.ibb.co/6grr9zQ/image.png',
+            width: '1536',
+            height: '768',
+            size: 639055,
+            time: '1661404780',
+            expiration: '600',
+            image: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/72jjMPh/image.png',
+            },
+            thumb: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/SR55YbS/image.png',
+            },
+            medium: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/6grr9zQ/image.png',
+            },
+            delete_url:
+              'https://ibb.co/SR55YbS/33bd8457301b82cb8ccddfceda7fa4ab',
+          },
+          success: true,
+          status: 200,
+        },
+      }),
+    );
+
+    const mockFile = path.join(__dirname, '../../../mocks/mock-image.png');
+    const file = fs.readFileSync(mockFile);
+
+    const data = await carService.uploadImage(file);
+    expect(data.data.image.filename).toBe('image.png');
+  });
+
+  it('should throw the error when upload failed', async () => {
+    (axios.post as jest.Mock).mockImplementation(() => Promise.reject('error'));
+
+    const mockFile = path.join(__dirname, '../../../mocks/mock-image.png');
+    const file = fs.readFileSync(mockFile);
+    try {
+      await carService.uploadImage(file);
+    } catch (err) {
+      expect(err).toBeInstanceOf(BadGatewayException);
+    }
   });
 });
