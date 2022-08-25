@@ -10,6 +10,11 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
+  @Get()
+  public getAllCar(): Promise<Car[]> {
+    return this.service.getAllCar();
+  }
+
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
