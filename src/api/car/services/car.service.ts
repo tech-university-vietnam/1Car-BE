@@ -54,7 +54,7 @@ export class CarService {
       });
 
       const response = await axios.post(
-        'https://api.imgbb.com/1/upload?expiration=600&key=93e0edd4fa1760adf671cc2805eeb5ff',
+        `https://api.imgbb.com/1/upload?expiration=600&key=${process.env.UPLOAD_API_KEY}`,
         form,
       );
 
