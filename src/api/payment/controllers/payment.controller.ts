@@ -1,6 +1,8 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { CreatePaymentDTO } from '../models/payment.dto';
+import { Response } from 'express';
+import Stripe from 'stripe';
+import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { Payment } from '../models/payment.entity';
 import { PaymentService } from '../services/payment.service';
 
@@ -10,14 +12,18 @@ export class PaymentController {
   @Inject(PaymentService)
   private readonly service: PaymentService;
 
-  @Get(':id')
-  public getPayment(@Param('id') id: string): Promise<Payment> {
-    return this.service.getPayment(id);
+  @Post('/checkout')
+  @ApiCreatedResponse()
+  public async createCheckoutSession(
+    @Body() body: CreateCheckoutSessionDTO,
+    @Res() res: Response,
+  ) {
+    const session = await this.service.createCheckoutSession(body);
+    return res.redirect(session.url);
   }
 
-  @Post()
-  @ApiCreatedResponse({ type: Payment })
-  public createPayment(@Body() body: CreatePaymentDTO): Promise<Payment> {
-    return this.service.createPayment(body);
+  @Post('/webhook')
+  public async handleIntentSuccessWebhook(@Body() body: Stripe.Event) {
+    return this.service.handleIntentSuccessWebhook(body);
   }
 }

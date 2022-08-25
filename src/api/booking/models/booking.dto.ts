@@ -1,1 +1,3 @@
-export class CreateBookingDTO {}
+export class CreateBookingDTO {
+  amount: number;
+}
