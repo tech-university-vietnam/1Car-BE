@@ -13,6 +13,9 @@ import { CarService } from './car.service';
 import * as fs from 'fs';
 import axios from 'axios';
 import { BadGatewayException, BadRequestException } from '@nestjs/common';
+import { CreateCarDTO } from '../models/car.dto';
+import { CarStatus } from '../../../contains';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 jest.mock('axios');
 
@@ -24,7 +27,9 @@ describe('CarService', () => {
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [
+        NestjsFormDataModule,
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.test' }),
+        NestjsFormDataModule.config({ storage: MemoryStoredFile }),
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: process.env.DATABASE_HOST,
@@ -122,5 +127,69 @@ describe('CarService', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(BadGatewayException);
     }
+  });
+
+  it('should created a car and return car detail', async () => {
+    (axios.post as jest.Mock).mockImplementation(() =>
+      Promise.resolve({
+        data: {
+          data: {
+            id: 'SR55YbS',
+            title: 'image',
+            url_viewer: 'https://ibb.co/SR55YbS',
+            url: 'https://i.ibb.co/72jjMPh/image.png',
+            display_url: 'https://i.ibb.co/6grr9zQ/image.png',
+            width: '1536',
+            height: '768',
+            size: 639055,
+            time: '1661404780',
+            expiration: '600',
+            image: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/72jjMPh/image.png',
+            },
+            thumb: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/SR55YbS/image.png',
+            },
+            medium: {
+              filename: 'image.png',
+              name: 'image',
+              mime: 'image/png',
+              extension: 'png',
+              url: 'https://i.ibb.co/6grr9zQ/image.png',
+            },
+            delete_url:
+              'https://ibb.co/SR55YbS/33bd8457301b82cb8ccddfceda7fa4ab',
+          },
+          success: true,
+          status: 200,
+        },
+      }),
+    );
+    const mockFile = path.join(__dirname, '../../../mocks/mock-image.png');
+    const file = fs.readFileSync(mockFile);
+
+    const carDetail = {
+      name: 'Audi A8',
+      description: 'Some words about this car',
+      status: CarStatus.AVAILABLE,
+      pricePerDate: 10000,
+      numberOfTrips: 10,
+      numberOfKilometer: 10,
+      locationId: 'string',
+    };
+
+    const images = [file];
+
+    const createdCar = await carService.createCar(carDetail, images);
+
+    expect(createdCar.name).toBe('Audi A8');
   });
 });

@@ -5,11 +5,13 @@ import { AppService } from './app.service';
 import { ApiModule } from './api/api.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmConfigService } from './shared/typeorm/typeorm.service';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     ApiModule,
   ],
   controllers: [AppController],

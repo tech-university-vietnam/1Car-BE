@@ -6,9 +6,11 @@ import { Car } from './models/car.entity';
 import { CarType } from './models/carType.entity';
 import { CarService } from './services/car.service';
 import { CarBrand } from './models/carBrand.entity';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([CarType]),
     TypeOrmModule.forFeature([CarSize]),

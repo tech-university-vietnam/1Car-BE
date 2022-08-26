@@ -9,7 +9,6 @@ import { CarSize } from '../models/carSize.entity';
 import { CarBrand } from '../models/carBrand.entity';
 import axios from 'axios';
 import * as FormData from 'form-data';
-import { Readable } from 'stream';
 
 @Injectable()
 export class CarService {
@@ -29,8 +28,20 @@ export class CarService {
     return this.carRepository.findOneBy({ id: id });
   }
 
-  public createCar(body: CreateCarDTO): Promise<Car> {
-    const car: Car = new Car();
+  public async createCar(
+    carDetail: Omit<CreateCarDTO, 'images'>,
+    images: Buffer[],
+  ): Promise<Car> {
+    const uploadResult = [];
+    for (const image of images) {
+      const result = await this.uploadImage(image);
+      uploadResult.push(result.data?.display_url);
+    }
+
+    const car: Car = this.carRepository.create({
+      ...carDetail,
+      images: uploadResult,
+    });
     return this.carRepository.save(car);
   }
 
