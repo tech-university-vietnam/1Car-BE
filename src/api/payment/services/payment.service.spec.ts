@@ -17,6 +17,7 @@ describe('PaymentService', () => {
   let testUtils: TestUtils;
   let bookingService: BookingService;
   let stripeService: StripeService;
+  let bookingRequest;
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
@@ -46,6 +47,14 @@ describe('PaymentService', () => {
     testUtils = new TestUtils(moduleRef.get(DataSource));
     await testUtils.cleanAll(['booking']);
     await testUtils.loadAll(['booking', 'payment']);
+
+    bookingRequest = {
+      userId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6f',
+      carId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
+      returnDateTime: '2018-01-15T08:54:45.000Z',
+      amount: 4000,
+      pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
+    };
   });
 
   afterEach(async () => {
@@ -56,23 +65,17 @@ describe('PaymentService', () => {
     jest
       .spyOn(stripeService, 'createCheckoutSession')
       .mockImplementation(() => expect.anything());
-    const checkoutRequest = {
-      userId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6f',
-      carId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-      returnDateTime: '2018-01-15T08:54:45.000Z',
-      amount: 4000,
-      pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-    };
 
-    await paymentService.createCheckoutSession(checkoutRequest);
+    await paymentService.createCheckoutSession(bookingRequest);
     const newBookings = await bookingService.getBookingsByUserId(
-      checkoutRequest.userId,
+      bookingRequest.userId,
     );
+
     expect(newBookings).toHaveLength(1);
-    expect(newBookings[0]).toHaveProperty('carId', checkoutRequest.carId);
+    expect(newBookings[0]).toHaveProperty('carId', bookingRequest.carId);
     expect(newBookings[0]).toHaveProperty(
       'returnDateTime',
-      new Date(checkoutRequest.returnDateTime),
+      new Date(bookingRequest.returnDateTime),
     );
     expect(newBookings[0]).toHaveProperty(
       'bookingStatus',
@@ -85,41 +88,49 @@ describe('PaymentService', () => {
     const mockFn = jest
       .spyOn(stripeService, 'createCheckoutSession')
       .mockImplementation(() => expect.anything());
-    const checkoutRequest = {
-      userId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6f',
-      carId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-      returnDateTime: '2018-01-15T08:54:45.000Z',
-      amount: 4000,
-      pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-    };
-    await paymentService.createCheckoutSession(checkoutRequest);
+
+    await paymentService.createCheckoutSession(bookingRequest);
+
     expect(mockFn).toBeCalledTimes(1);
   });
 
-  it('handleIntentSuccessWebhook -> should update booking status when payment success', async () => {
+  it('handleIntentWebhook -> should update booking status when payment success', async () => {
     const mockedWebhookEvent = testUtils.loadJson(
       'intent_success_webhook',
     ) as Stripe.Event;
     const intentEvent = mockedWebhookEvent.data.object as Stripe.PaymentIntent;
-    const booking = {
-      userId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6f',
-      carId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-      returnDateTime: '2018-01-15T08:54:45.000Z',
-      amount: 4000,
-      pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
-    };
-    const testBooking = await bookingService.createBooking(booking);
+    const testBooking = await bookingService.createBooking(bookingRequest);
     intentEvent.metadata.bookingId = testBooking.id;
 
     expect(
       (await bookingService.getBooking(testBooking.id)).bookingStatus,
     ).toBe(bookingStatus.PENDING);
 
-    await paymentService.handleIntentSuccessWebhook(mockedWebhookEvent);
+    await paymentService.handleIntentWebhook(mockedWebhookEvent);
 
     expect(await bookingService.getBooking(testBooking.id)).not.toBeNull();
     expect(
       (await bookingService.getBooking(testBooking.id)).bookingStatus,
     ).toBe(bookingStatus.SUCCESS);
+  });
+
+  it('handleIntentWebhook -> should update booking status when payment faled', async () => {
+    const mockedWebhookEvent = testUtils.loadJson(
+      'intent_failed_webhook',
+    ) as Stripe.Event;
+    const intentEvent = mockedWebhookEvent.data.object as Stripe.PaymentIntent;
+    const testBooking = await bookingService.createBooking(bookingRequest);
+    intentEvent.metadata.bookingId = testBooking.id;
+
+    expect(
+      (await bookingService.getBooking(testBooking.id)).bookingStatus,
+    ).toBe(bookingStatus.PENDING);
+
+    await paymentService.handleIntentWebhook(mockedWebhookEvent);
+
+    expect(await bookingService.getBooking(testBooking.id)).not.toBeNull();
+    expect(
+      (await bookingService.getBooking(testBooking.id)).bookingStatus,
+    ).toBe(bookingStatus.FAIL);
   });
 });

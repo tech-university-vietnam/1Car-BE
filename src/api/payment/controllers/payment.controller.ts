@@ -23,7 +23,7 @@ export class PaymentController {
   }
 
   @Post('/webhook')
-  public async handleIntentSuccessWebhook(@Body() body: Stripe.Event) {
-    return this.service.handleIntentSuccessWebhook(body);
+  public async handleIntentWebhook(@Body() body: Stripe.Event) {
+    return this.service.handleIntentWebhook(body);
   }
 }

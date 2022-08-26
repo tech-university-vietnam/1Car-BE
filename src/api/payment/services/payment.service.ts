@@ -38,7 +38,7 @@ export class PaymentService {
     );
   }
 
-  public async handleIntentSuccessWebhook(@Body() body: Stripe.Event) {
+  public async handleIntentWebhook(@Body() body: Stripe.Event) {
     switch (body.type) {
       case 'payment_intent.succeeded':
         // Retrieve data from event
@@ -72,7 +72,8 @@ export class PaymentService {
         await this.bookingRepository.update(bookingId, {
           bookingStatus: bookingStatus.FAIL,
         });
-        throw Error(intentEvent.charges.data[0].failure_message);
+        console.log(intentEvent.charges.data[0].failure_message);
+        break;
       default:
         console.log(`Unhandled event type ${body.type}`);
     }
