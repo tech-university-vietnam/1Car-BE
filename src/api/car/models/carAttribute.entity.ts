@@ -10,10 +10,14 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class CarBrand {
+export class CarAttribute {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
   public id!: string;
+
+  @Column({ type: 'text' })
+  @ApiProperty()
+  public type: string;
 
   @Column({ type: 'text' })
   @ApiProperty({ default: 'Audi' })

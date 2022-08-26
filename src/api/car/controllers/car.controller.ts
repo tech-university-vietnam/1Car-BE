@@ -5,6 +5,7 @@ import {
   Inject,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -20,6 +21,8 @@ import { Car } from '../models/car.entity';
 import { CarService } from '../services/car.service';
 import { FormDataRequest } from 'nestjs-form-data';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
+import { CreateCarAttributeDto } from '../models/carAttribute.dto';
+import { CarAttribute } from '../models/carAttribute.entity';
 
 @Controller('car')
 @ApiTags('car')
@@ -27,20 +30,24 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
-  @Get()
-  public getAllCar(): Promise<Car[]> {
-    return this.service.getAllCar();
-  }
-
-  @Get(':id')
-  public getCar(@Param('id') id: string): Promise<Car> {
-    return this.service.getCar(id);
+  @Get('/attribute')
+  getAttribute(
+    @Body() data: CreateCarAttributeDto,
+    @Query('type') type?: string,
+  ) {
+    return this.service.getAttribute(type);
   }
 
   @Post('/upload')
   @UseInterceptors(FileInterceptor('file'))
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.service.uploadImage(file.buffer);
+  }
+
+  @Post('/attribute')
+  @ApiCreatedResponse({ type: CarAttribute })
+  createAttribute(@Body() data: CreateCarAttributeDto) {
+    return this.service.createAttribute(data);
   }
 
   @Post()
@@ -56,5 +63,15 @@ export class CarController {
       files.map((item) => item.buffer),
     );
     return createdCar;
+  }
+
+  @Get(':id')
+  public getCar(@Param('id') id: string): Promise<Car> {
+    return this.service.getCar(id);
+  }
+
+  @Get()
+  public getAllCar(): Promise<Car[]> {
+    return this.service.getAllCar();
   }
 }

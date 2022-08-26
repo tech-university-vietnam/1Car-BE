@@ -1,28 +1,25 @@
-import { CarType } from './../models/carType.entity';
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CarStatus } from '../../../contains';
-import { Repository } from 'typeorm';
-import { CreateCarDTO } from '../models/car.dto';
-import { Car } from '../models/car.entity';
-import { CarSize } from '../models/carSize.entity';
-import { CarBrand } from '../models/carBrand.entity';
 import axios from 'axios';
 import * as FormData from 'form-data';
+import * as _ from 'lodash';
+import { FindManyOptions, In, Repository } from 'typeorm';
+import { CreateCarDTO } from '../models/car.dto';
+import { Car } from '../models/car.entity';
+import { CreateCarAttributeDto } from '../models/carAttribute.dto';
+import { CarAttribute } from './../models/carAttribute.entity';
 
 @Injectable()
 export class CarService {
   @InjectRepository(Car)
   private readonly carRepository: Repository<Car>;
 
-  @InjectRepository(CarType)
-  private readonly carTypeRepository: Repository<CarType>;
-
-  @InjectRepository(CarSize)
-  private readonly carSizeRepository: Repository<CarSize>;
-
-  @InjectRepository(CarBrand)
-  private readonly carBrandRepository: Repository<CarBrand>;
+  @InjectRepository(CarAttribute)
+  private readonly carAttributeRepository: Repository<CarAttribute>;
 
   public getCar(id: string): Promise<Car> {
     return this.carRepository.findOneBy({ id: id });
@@ -32,6 +29,10 @@ export class CarService {
     carDetail: Omit<CreateCarDTO, 'images'>,
     images: Buffer[],
   ): Promise<Car> {
+    const listAttributes = await this.getAttributesFromIds(
+      _.uniq(carDetail.attributes),
+    );
+
     const uploadResult = [];
     for (const image of images) {
       const result = await this.uploadImage(image);
@@ -40,6 +41,7 @@ export class CarService {
 
     const car: Car = this.carRepository.create({
       ...carDetail,
+      attributes: listAttributes,
       images: uploadResult,
     });
     return this.carRepository.save(car);
@@ -73,5 +75,34 @@ export class CarService {
     } catch (err) {
       throw new BadGatewayException('Upload to imgbb failed');
     }
+  }
+
+  public async getAttributesFromIds(listId: string[]) {
+    const result = await this.carAttributeRepository.find({
+      where: {
+        id: In(listId),
+      },
+    });
+
+    if (result.length != listId.length)
+      throw new BadRequestException('Attribute not found');
+
+    return result;
+  }
+
+  public async createAttribute(attributeDetail: CreateCarAttributeDto) {
+    const result = await this.carAttributeRepository.save(attributeDetail);
+
+    return result;
+  }
+
+  public async getAttribute(type?: string) {
+    const filter: FindManyOptions<CarAttribute> = {};
+
+    if (type) filter.where = { type };
+
+    const result = await this.carAttributeRepository.find(filter);
+
+    return result;
   }
 }

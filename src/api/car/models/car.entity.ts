@@ -1,17 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Max, Min } from 'class-validator';
-import { CarStatus } from '../../../contains';
+import { Min } from 'class-validator';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  ManyToOne,
 } from 'typeorm';
-import { CarBrand } from './carBrand.entity';
-import { CarSize } from './carSize.entity';
-import { CarType } from './carType.entity';
+import { CarStatus } from '../../../contains';
+import { CarAttribute } from './carAttribute.entity';
 
 export enum carStatus {
   AVAILABLE = 'AVAILABLE',
@@ -59,17 +58,10 @@ export class Car {
   @ApiProperty({ nullable: true })
   public locationId: string;
 
-  @ManyToOne(() => CarType, { onDelete: 'SET NULL' })
+  @ManyToMany(() => CarAttribute, { onDelete: 'SET NULL' })
+  @JoinTable()
   @ApiProperty({ nullable: true })
-  public carType: CarType;
-
-  @ManyToOne(() => CarBrand, { onDelete: 'SET NULL' })
-  @ApiProperty({ nullable: true })
-  public carBrand: CarBrand;
-
-  @ManyToOne(() => CarSize, { onDelete: 'SET NULL' })
-  @ApiProperty({ nullable: true })
-  public carSize: CarSize;
+  public attributes: CarAttribute[];
 
   @Column({ type: 'boolean', default: false })
   @ApiProperty({ default: false })

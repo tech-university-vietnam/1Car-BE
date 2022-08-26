@@ -6,9 +6,7 @@ import { DataSource } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
 import { Car } from '../models/car.entity';
-import { CarBrand } from '../models/carBrand.entity';
-import { CarSize } from '../models/carSize.entity';
-import { CarType } from '../models/carType.entity';
+import { CarAttribute } from '../models/carAttribute.entity';
 import { CarService } from './car.service';
 import * as fs from 'fs';
 import axios from 'axios';
@@ -42,9 +40,7 @@ describe('CarService', () => {
           dropSchema: true,
         }),
         TypeOrmModule.forFeature([Car]),
-        TypeOrmModule.forFeature([CarType]),
-        TypeOrmModule.forFeature([CarSize]),
-        TypeOrmModule.forFeature([CarBrand]),
+        TypeOrmModule.forFeature([CarAttribute]),
       ],
       controllers: [CarController],
       providers: [CarService],
@@ -52,8 +48,8 @@ describe('CarService', () => {
 
     carService = moduleRef.get(CarService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-    await testUtils.cleanAll(['car']);
-    await testUtils.loadAll(['car_brand', 'car_size', 'car_type', 'car']);
+    await testUtils.cleanAll(['car', 'car_attribute']);
+    await testUtils.loadAll(['car_attribute', 'car']);
   });
 
   afterEach(async () => {
@@ -184,6 +180,7 @@ describe('CarService', () => {
       numberOfTrips: 10,
       numberOfKilometer: 10,
       locationId: 'string',
+      attributes: ['3926cd59-cd4b-4bbc-821d-21800019780f'],
     };
 
     const images = [file];

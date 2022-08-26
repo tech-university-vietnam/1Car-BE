@@ -1,16 +1,8 @@
 import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsNumber,
-  IsNumberString,
-  IsOptional,
-  IsString,
-  IsUrl,
-} from 'class-validator';
+import { IsIn, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 import {
   HasMimeType,
   IsFile,
-  IsFiles,
   MaxFileSize,
   MemoryStoredFile,
 } from 'nestjs-form-data';
@@ -41,11 +33,14 @@ export class CreateCarDTO {
   numberOfKilometer: number;
 
   @IsString()
-  @IsOptional()
+  @IsOptional() //locationId of google places api
   locationId: string;
 
   @IsFile()
-  @MaxFileSize(1e6, { each: true })
+  @MaxFileSize(1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
   @HasMimeType(['image/jpeg', 'image/png'], { each: true })
   images: MemoryStoredFile;
+
+  @IsUUID('all', { each: true })
+  attributes: string[];
 }
