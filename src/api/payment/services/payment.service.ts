@@ -1,4 +1,5 @@
 import { Body, Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import Stripe from 'stripe';
 import { DataSource, Repository } from 'typeorm';
@@ -25,14 +26,18 @@ export class PaymentService {
   @Inject(DataSource)
   private readonly dataSource: DataSource;
 
+  @Inject(ConfigService)
+  private readonly config: ConfigService;
+
   public async createCheckoutSession(body: CreateCheckoutSessionDTO) {
     // Create booking in our DB
     const booking = await this.bookingService.createBooking(body);
 
+    console.log(this.config.get<string>('CLIENT_BASE_URL'));
     return await this.stripeService.createCheckoutSession(
       body.amount,
-      'https://www.google.com',
-      'https://www.bing.com',
+      `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
+      `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
       'BMW',
       booking.id,
     );

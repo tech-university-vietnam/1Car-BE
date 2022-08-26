@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Booking } from '../booking/models/booking.entity';
+import { BookingService } from '../booking/services/booking.service';
 import { PaymentController } from './controllers/payment.controller';
 import { Payment } from './models/payment.entity';
 import { PaymentService } from './services/payment.service';
@@ -13,6 +14,6 @@ import { StripeService } from './services/stripe.service';
     TypeOrmModule.forFeature([Booking]),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, StripeService, ConfigService],
+  providers: [PaymentService, StripeService, ConfigService, BookingService],
 })
 export class PaymentModule {}
