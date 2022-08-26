@@ -58,7 +58,7 @@ export class Car {
   @ApiProperty({ nullable: true })
   public locationId: string;
 
-  @ManyToMany(() => CarAttribute, { onDelete: 'SET NULL' })
+  @ManyToMany(() => CarAttribute, { onDelete: 'CASCADE' })
   @JoinTable()
   @ApiProperty({ nullable: true })
   public attributes: CarAttribute[];

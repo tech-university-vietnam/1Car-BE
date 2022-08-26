@@ -2,7 +2,7 @@ import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as path from 'path';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
 import { Car } from '../models/car.entity';
@@ -14,6 +14,7 @@ import { BadGatewayException, BadRequestException } from '@nestjs/common';
 import { CreateCarDTO } from '../models/car.dto';
 import { CarStatus } from '../../../contains';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 
 jest.mock('axios');
 
@@ -48,7 +49,12 @@ describe('CarService', () => {
 
     carService = moduleRef.get(CarService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-    await testUtils.cleanAll(['car', 'car_attribute']);
+
+    await testUtils.cleanAll([
+      'car_attributes_car_attribute',
+      'car',
+      'car_attribute',
+    ]);
     await testUtils.loadAll(['car_attribute', 'car']);
   });
 
@@ -188,5 +194,48 @@ describe('CarService', () => {
     const createdCar = await carService.createCar(carDetail, images);
 
     expect(createdCar.name).toBe('Audi A8');
+  });
+
+  it('should create an attribute and return attribute detail', async () => {
+    const testAttribute: CreateCarAttributeDto = {
+      type: 'brand',
+      name: 'Ferrari',
+    };
+
+    const attribute = await carService.createAttribute(testAttribute);
+
+    expect(attribute.name).toBe('Ferrari');
+  });
+
+  it('should return a list of car attribute', async () => {
+    // 5 brand attribute that have inserted to DB
+    const listAttributeBrand = await carService.getAttribute('brand');
+    expect(listAttributeBrand).toHaveLength(5);
+
+    // 10 attribute that have inserted to DB
+    const allAttributes = await carService.getAttribute();
+    expect(allAttributes).toHaveLength(10);
+  });
+
+  it('should return list attribute from list ID', async () => {
+    // 3 attribute that have inserted to DB & reduce the duplicate ids
+    const listAttribute = await carService.getAttributesFromIds([
+      'd43eceb9-36fd-4500-ac46-68cc3ea433da',
+      '869562b6-a012-4b55-becb-efbabd804de9',
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+    ]);
+    expect(listAttribute).toHaveLength(3);
+  });
+
+  it('should throw error if attribute not found', async () => {
+    // 3 attribute that have inserted to DB & reduce the duplicate ids
+    const listAttribute = await carService.getAttributesFromIds([
+      'd43eceb9-36fd-4500-ac46-68cc3ea433dc', //this is wrong attribute id
+      '869562b6-a012-4b55-becb-efbabd804de9',
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+    ]);
+    expect(listAttribute).toThrowError(BadRequestException);
   });
 });

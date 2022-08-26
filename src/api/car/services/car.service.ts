@@ -30,7 +30,7 @@ export class CarService {
     images: Buffer[],
   ): Promise<Car> {
     const listAttributes = await this.getAttributesFromIds(
-      _.uniq(carDetail.attributes),
+      carDetail.attributes,
     );
 
     const uploadResult = [];
@@ -50,9 +50,7 @@ export class CarService {
   public async getAllCar(): Promise<Car[]> {
     const data = await this.carRepository
       .createQueryBuilder('car')
-      .leftJoinAndSelect('car.carBrand', 'car_brand')
-      .leftJoinAndSelect('car.carType', 'car_type')
-      .leftJoinAndSelect('car.carSize', 'car_size')
+      .leftJoinAndSelect('car.attributes', 'car_attribute')
       .getMany();
 
     return data;
@@ -78,13 +76,15 @@ export class CarService {
   }
 
   public async getAttributesFromIds(listId: string[]) {
+    const listReducedDuplicateIds = _.uniq(listId);
+
     const result = await this.carAttributeRepository.find({
       where: {
-        id: In(listId),
+        id: In(listReducedDuplicateIds),
       },
     });
 
-    if (result.length != listId.length)
+    if (result.length != listReducedDuplicateIds.length)
       throw new BadRequestException('Attribute not found');
 
     return result;
