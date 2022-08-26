@@ -228,13 +228,16 @@ describe('CarService', () => {
   });
 
   it('should throw error if attribute not found', async () => {
-    // 3 attribute that have inserted to DB & reduce the duplicate ids
-    const listAttribute = await carService.getAttributesFromIds([
-      'd43eceb9-36fd-4500-ac46-68cc3ea433dc', //this is wrong attribute id
-      '869562b6-a012-4b55-becb-efbabd804de9',
-      '477004fa-bcb1-4abd-83ee-c99175532c17',
-      '477004fa-bcb1-4abd-83ee-c99175532c17',
-    ]);
-    expect(listAttribute).toThrowError(BadRequestException);
+    try {
+      // 3 attribute that have inserted to DB & reduce the duplicate ids
+      const listAttribute = await carService.getAttributesFromIds([
+        'd43eceb9-36fd-4500-ac46-68cc3ea433dc', //this is wrong attribute id
+        '869562b6-a012-4b55-becb-efbabd804de9',
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+      ]);
+    } catch (err) {
+      expect(err).toBeInstanceOf(BadRequestException);
+    }
   });
 });
