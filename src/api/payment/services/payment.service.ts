@@ -33,7 +33,6 @@ export class PaymentService {
     // Create booking in our DB
     const booking = await this.bookingService.createBooking(body);
 
-    console.log(this.config.get<string>('CLIENT_BASE_URL'));
     return await this.stripeService.createCheckoutSession(
       body.amount,
       `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
