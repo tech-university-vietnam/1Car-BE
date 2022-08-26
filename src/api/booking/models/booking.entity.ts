@@ -1,16 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  OneToOne,
-  JoinColumn,
-  ManyToOne,
 } from 'typeorm';
-import { User } from '../../user/models/user.entity';
-import { Car } from '../../car/models/car.entity';
 
 export enum bookingStatus {
   PENDING = 'PENDING',

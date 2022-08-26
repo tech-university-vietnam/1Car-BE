@@ -9,20 +9,15 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import {
-  AnyFilesInterceptor,
-  FileInterceptor,
-  FilesInterceptor,
-} from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { Readable } from 'stream';
-import { CreateCarDTO } from '../models/car.dto';
-import { Car } from '../models/car.entity';
-import { CarService } from '../services/car.service';
 import { FormDataRequest } from 'nestjs-form-data';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
+import { CreateCarDTO } from '../models/car.dto';
+import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
+import { CarService } from '../services/car.service';
 
 @Controller('car')
 @ApiTags('car')
