@@ -1,20 +1,19 @@
+import { BadGatewayException, BadRequestException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import axios from 'axios';
+import * as fs from 'fs';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import * as path from 'path';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
+import { CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
 import { Car } from '../models/car.entity';
+import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarService } from './car.service';
-import * as fs from 'fs';
-import axios from 'axios';
-import { BadGatewayException, BadRequestException } from '@nestjs/common';
-import { CreateCarDTO } from '../models/car.dto';
-import { CarStatus } from '../../../contains';
-import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
-import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 
 jest.mock('axios');
 
