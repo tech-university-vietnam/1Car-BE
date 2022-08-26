@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Booking } from 'src/api/booking/models/booking.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -9,6 +8,7 @@ import {
   OneToOne,
   JoinColumn,
 } from 'typeorm';
+import { Booking } from '../../booking/models/booking.entity';
 
 @Entity()
 export class Payment {

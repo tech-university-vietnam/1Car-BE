@@ -31,7 +31,7 @@ export class TestUtils {
     try {
       for (const entity of entities) {
         const repository = await this.databaseService.getRepository(entity);
-        await repository.query(`TRUNCATE TABLE ${entity} ;`);
+        await repository.query(`TRUNCATE TABLE ${entity} CASCADE;`);
       }
     } catch (error) {
       throw new Error(`ERROR: Cleaning test db: ${error}`);
@@ -57,6 +57,20 @@ export class TestUtils {
     } catch (error) {
       throw new Error(
         `ERROR [TestUtils.loadAll()]: Loading fixtures on test db: ${error}`,
+      );
+    }
+  }
+
+  loadJson(entity) {
+    try {
+      const fixtureFile = `../mocks/${entity}.json`;
+      const pathOfFile = path.join(__dirname, fixtureFile);
+      if (fs.existsSync(pathOfFile)) {
+        return JSON.parse(fs.readFileSync(pathOfFile, 'utf8'));
+      }
+    } catch (error) {
+      throw new Error(
+        `ERROR [TestUtils.loadJson()]: Unable to parse JSON file: ${error}`,
       );
     }
   }

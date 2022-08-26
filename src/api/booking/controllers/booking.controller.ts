@@ -3,6 +3,7 @@ import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Booking } from '../models/booking.entity';
 import { CreateBookingDTO } from '../models/booking.dto';
 import { BookingService } from '../services/booking.service';
+import { CreateCheckoutSessionDTO } from '../../payment/models/payment.dto';
 
 @Controller('booking')
 @ApiTags('booking')
@@ -17,7 +18,9 @@ export class BookingController {
 
   @Post()
   @ApiCreatedResponse({ type: Booking })
-  public createBooking(@Body() body: CreateBookingDTO): Promise<Booking> {
+  public createBooking(
+    @Body() body: CreateCheckoutSessionDTO,
+  ): Promise<Booking> {
     return this.service.createBooking(body);
   }
 }

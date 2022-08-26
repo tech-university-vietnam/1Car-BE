@@ -1,8 +1,9 @@
 import { Body, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Booking, bookingStatus } from 'src/api/booking/models/booking.entity';
 import Stripe from 'stripe';
 import { DataSource, Repository } from 'typeorm';
+import { Booking, bookingStatus } from '../../booking/models/booking.entity';
+import { BookingService } from '../../booking/services/booking.service';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { Payment } from '../models/payment.entity';
 import { StripeService } from './stripe.service';
@@ -15,6 +16,9 @@ export class PaymentService {
   @InjectRepository(Booking)
   private readonly bookingRepository: Repository<Booking>;
 
+  @Inject(BookingService)
+  private readonly bookingService: BookingService;
+
   @Inject(StripeService)
   private readonly stripeService: StripeService;
 
@@ -23,14 +27,7 @@ export class PaymentService {
 
   public async createCheckoutSession(body: CreateCheckoutSessionDTO) {
     // Create booking in our DB
-    const booking: Booking = new Booking();
-    console.log(body.returnDateTime);
-    booking.returnDateTime = new Date(body.returnDateTime);
-    booking.totalPrice = body.amount;
-    booking.carId = body.carId;
-    booking.userId = body.userId;
-    booking.pickUpLocationId = body.pickUpLocationId;
-    await this.bookingRepository.save(booking);
+    const booking = await this.bookingService.createBooking(body);
 
     return await this.stripeService.createCheckoutSession(
       body.amount,
@@ -47,7 +44,6 @@ export class PaymentService {
         // Retrieve data from event
         await this.dataSource.transaction(async (manager) => {
           const intentEvent = body.data.object as Stripe.PaymentIntent;
-          console.log(intentEvent);
           const stripePaymentId = intentEvent.charges.data[0]
             ? intentEvent.charges.data[0].id
             : null;

@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Max, Min } from 'class-validator';
-import { CarStatus } from 'src/contains';
 import {
   Entity,
   PrimaryGeneratedColumn,
