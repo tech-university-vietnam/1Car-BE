@@ -60,18 +60,4 @@ export class TestUtils {
       );
     }
   }
-
-  loadJson(entity) {
-    try {
-      const fixtureFile = `../mocks/${entity}.json`;
-      const pathOfFile = path.join(__dirname, fixtureFile);
-      if (fs.existsSync(pathOfFile)) {
-        return JSON.parse(fs.readFileSync(pathOfFile, 'utf8'));
-      }
-    } catch (error) {
-      throw new Error(
-        `ERROR [TestUtils.loadJson()]: Unable to parse JSON file: ${error}`,
-      );
-    }
-  }
 }

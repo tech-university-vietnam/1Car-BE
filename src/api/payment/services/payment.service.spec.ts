@@ -10,6 +10,9 @@ import { Payment } from '../models/payment.entity';
 import { PaymentService } from './payment.service';
 import { StripeService } from './stripe.service';
 import Stripe from 'stripe';
+import { BadRequestException, RawBodyRequest } from '@nestjs/common';
+import { Request } from 'express';
+import utils from '../../../utils/utils';
 
 describe('PaymentService', () => {
   let moduleRef: TestingModule;
@@ -95,18 +98,23 @@ describe('PaymentService', () => {
   });
 
   it('handleIntentWebhook -> should update booking status when payment success', async () => {
-    const mockedWebhookEvent = testUtils.loadJson(
+    const mockedEventRequest = utils.loadJson(
+      'intent_success_request',
+    ) as RawBodyRequest<Request>;
+    const mockedEvent = utils.loadJson(
       'intent_success_webhook',
     ) as Stripe.Event;
-    const intentEvent = mockedWebhookEvent.data.object as Stripe.PaymentIntent;
+
+    const intentEvent = mockedEvent.data.object as Stripe.PaymentIntent;
     const testBooking = await bookingService.createBooking(bookingRequest);
     intentEvent.metadata.bookingId = testBooking.id;
+    jest.spyOn(stripeService, 'constructEvent').mockReturnValue(mockedEvent);
 
     expect(
       (await bookingService.getBooking(testBooking.id)).bookingStatus,
     ).toBe(bookingStatus.PENDING);
 
-    await paymentService.handleIntentWebhook(mockedWebhookEvent);
+    await paymentService.handleIntentWebhook(mockedEventRequest);
 
     expect(await bookingService.getBooking(testBooking.id)).not.toBeNull();
     expect(
@@ -115,22 +123,53 @@ describe('PaymentService', () => {
   });
 
   it('handleIntentWebhook -> should update booking status when payment faled', async () => {
-    const mockedWebhookEvent = testUtils.loadJson(
-      'intent_failed_webhook',
-    ) as Stripe.Event;
-    const intentEvent = mockedWebhookEvent.data.object as Stripe.PaymentIntent;
+    const mockedEventRequest = utils.loadJson(
+      'intent_failed_request',
+    ) as RawBodyRequest<Request>;
+    const mockedEvent = utils.loadJson('intent_failed_webhook') as Stripe.Event;
+
+    const intentEvent = mockedEvent.data.object as Stripe.PaymentIntent;
     const testBooking = await bookingService.createBooking(bookingRequest);
     intentEvent.metadata.bookingId = testBooking.id;
+    jest.spyOn(stripeService, 'constructEvent').mockReturnValue(mockedEvent);
 
     expect(
       (await bookingService.getBooking(testBooking.id)).bookingStatus,
     ).toBe(bookingStatus.PENDING);
 
-    await paymentService.handleIntentWebhook(mockedWebhookEvent);
+    await paymentService.handleIntentWebhook(mockedEventRequest);
 
     expect(await bookingService.getBooking(testBooking.id)).not.toBeNull();
     expect(
       (await bookingService.getBooking(testBooking.id)).bookingStatus,
     ).toBe(bookingStatus.FAIL);
+  });
+
+  it('handleIntentWebhook -> should throw BadRequestException for incorrect signature', async () => {
+    const mockedEventRequest = utils.loadJson(
+      'intent_failed_request',
+    ) as RawBodyRequest<Request>;
+    const payload = {
+      id: 'evt_test_webhook',
+      object: 'event',
+    };
+    const payloadString = JSON.stringify(payload, null, 2);
+    const secret = 'whsec_test_secret';
+    const header = stripeService.generateTestHeaderString(
+      payloadString,
+      secret,
+    );
+    jest
+      .spyOn(stripeService, 'constructEvent')
+      .mockImplementationOnce(() =>
+        stripeService.constructEvent(
+          payloadString,
+          header,
+          process.env.STRIPE_INTENT_WEBHOOK_SIG_KEY,
+        ),
+      );
+    await expect(
+      paymentService.handleIntentWebhook(mockedEventRequest),
+    ).rejects.toThrowError(BadRequestException);
   });
 });

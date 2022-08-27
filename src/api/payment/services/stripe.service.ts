@@ -15,14 +15,14 @@ export class StripeService {
     );
   }
 
-  public async createCheckoutSession(
+  public createCheckoutSession = async (
     amount: number,
     successUrl: string,
     cancelUrl: string,
     carName: string,
     bookingId: string,
-  ) {
-    return await this.stripe.checkout.sessions.create({
+  ) =>
+    await this.stripe.checkout.sessions.create({
       line_items: [
         {
           price_data: {
@@ -43,6 +43,20 @@ export class StripeService {
       mode: 'payment',
       success_url: successUrl,
       cancel_url: cancelUrl,
+    });
+
+  public constructEvent(
+    payload: string | Buffer,
+    header: string | string[],
+    secret: string,
+  ): Stripe.Event {
+    return this.stripe.webhooks.constructEvent(payload, header, secret);
+  }
+
+  public generateTestHeaderString(payload: string, secret: string) {
+    return this.stripe.webhooks.generateTestHeaderString({
+      payload,
+      secret,
     });
   }
 }

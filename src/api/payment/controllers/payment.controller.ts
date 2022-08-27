@@ -1,9 +1,15 @@
-import { Body, Controller, Inject, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  Post,
+  RawBodyRequest,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
-import { Response } from 'express';
-import Stripe from 'stripe';
+import { Request, Response } from 'express';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
-import { Payment } from '../models/payment.entity';
 import { PaymentService } from '../services/payment.service';
 
 @Controller('payment')
@@ -23,7 +29,7 @@ export class PaymentController {
   }
 
   @Post('/webhook')
-  public async handleIntentWebhook(@Body() body: Stripe.Event) {
-    return this.service.handleIntentWebhook(body);
+  public async handleIntentWebhook(@Req() request: RawBodyRequest<Request>) {
+    return this.service.handleIntentWebhook(request);
   }
 }
