@@ -8,14 +8,14 @@ export class AuthService {
   public decodeTokenToObject = (
     token: string,
   ): string | Record<string, any> => {
-    return this.jwtService.decode(token);
+    return this.jwtService.decode(token) || null;
   };
 
   public decodeTokenToEmail = (token: string): string => {
     const secretObject = this.decodeTokenToObject(token);
     if (typeof secretObject == 'string') {
       return secretObject;
-    } else return secretObject[process.env.EMAIL_FIELD_NAME];
+    } else return secretObject[process.env.EMAIL_FIELD_NAME] || null;
   };
 
   public fromTokenGetEmail = (
