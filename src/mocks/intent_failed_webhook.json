@@ -1,0 +1,230 @@
+{
+  "id": "evt_3LaaAcKdTNhAxbgQ0jO2F2ky",
+  "object": "event",
+  "api_version": "2022-08-01",
+  "created": 1661411409,
+  "data": {
+    "object": {
+      "id": "pi_3LaaAcKdTNhAxbgQ0HRSAINU",
+      "object": "payment_intent",
+      "amount": 4000,
+      "amount_capturable": 0,
+      "amount_details": {
+        "tip": {
+        }
+      },
+      "amount_received": 0,
+      "application": null,
+      "application_fee_amount": null,
+      "automatic_payment_methods": null,
+      "canceled_at": null,
+      "cancellation_reason": null,
+      "capture_method": "automatic",
+      "charges": {
+        "object": "list",
+        "data": [
+          {
+            "id": "ch_3LaaAcKdTNhAxbgQ03xmgqEN",
+            "object": "charge",
+            "amount": 4000,
+            "amount_captured": 0,
+            "amount_refunded": 0,
+            "application": null,
+            "application_fee": null,
+            "application_fee_amount": null,
+            "balance_transaction": null,
+            "billing_details": {
+              "address": {
+                "city": null,
+                "country": "VN",
+                "line1": null,
+                "line2": null,
+                "postal_code": null,
+                "state": null
+              },
+              "email": "asdasd@gmail.com",
+              "name": "Chuong",
+              "phone": null
+            },
+            "calculated_statement_descriptor": "1CAR INC.",
+            "captured": false,
+            "created": 1661411408,
+            "currency": "usd",
+            "customer": null,
+            "description": null,
+            "destination": null,
+            "dispute": null,
+            "disputed": false,
+            "failure_balance_transaction": null,
+            "failure_code": "processing_error",
+            "failure_message": "An error occurred while processing your card. Try again in a little bit.",
+            "fraud_details": {
+            },
+            "invoice": null,
+            "livemode": false,
+            "metadata": {
+              "bookingId": "fbc11e73-a490-40cc-9c1d-e851111eb951"
+            },
+            "on_behalf_of": null,
+            "order": null,
+            "outcome": {
+              "network_status": "declined_by_network",
+              "reason": "processing_error",
+              "risk_level": "normal",
+              "risk_score": 42,
+              "seller_message": "The bank returned the decline code `processing_error`.",
+              "type": "issuer_declined"
+            },
+            "paid": false,
+            "payment_intent": "pi_3LaaAcKdTNhAxbgQ0HRSAINU",
+            "payment_method": "pm_1LaaCZKdTNhAxbgQLKIaUs8m",
+            "payment_method_details": {
+              "card": {
+                "brand": "visa",
+                "checks": {
+                  "address_line1_check": null,
+                  "address_postal_code_check": null,
+                  "cvc_check": "pass"
+                },
+                "country": "US",
+                "exp_month": 1,
+                "exp_year": 2024,
+                "fingerprint": "WDflG5ziyJYTjLy9",
+                "funding": "credit",
+                "installments": null,
+                "last4": "0119",
+                "mandate": null,
+                "network": "visa",
+                "three_d_secure": null,
+                "wallet": null
+              },
+              "type": "card"
+            },
+            "receipt_email": null,
+            "receipt_number": null,
+            "receipt_url": null,
+            "refunded": false,
+            "refunds": {
+              "object": "list",
+              "data": [
+              ],
+              "has_more": false,
+              "total_count": 0,
+              "url": "/v1/charges/ch_3LaaAcKdTNhAxbgQ03xmgqEN/refunds"
+            },
+            "review": null,
+            "shipping": null,
+            "source": null,
+            "source_transfer": null,
+            "statement_descriptor": null,
+            "statement_descriptor_suffix": null,
+            "status": "failed",
+            "transfer_data": null,
+            "transfer_group": null
+          }
+        ],
+        "has_more": true,
+        "total_count": 2,
+        "url": "/v1/charges?payment_intent=pi_3LaaAcKdTNhAxbgQ0HRSAINU"
+      },
+      "client_secret": "pi_3LaaAcKdTNhAxbgQ0HRSAINU_secret_YZuvJSqt2oLPx1vELTzBzus4o",
+      "confirmation_method": "automatic",
+      "created": 1661411286,
+      "currency": "usd",
+      "customer": null,
+      "description": null,
+      "invoice": null,
+      "last_payment_error": {
+        "charge": "ch_3LaaAcKdTNhAxbgQ03xmgqEN",
+        "code": "processing_error",
+        "doc_url": "https://stripe.com/docs/error-codes/processing-error",
+        "message": "An error occurred while processing your card. Try again in a little bit.",
+        "payment_method": {
+          "id": "pm_1LaaCZKdTNhAxbgQLKIaUs8m",
+          "object": "payment_method",
+          "billing_details": {
+            "address": {
+              "city": null,
+              "country": "VN",
+              "line1": null,
+              "line2": null,
+              "postal_code": null,
+              "state": null
+            },
+            "email": "asdasd@gmail.com",
+            "name": "Chuong",
+            "phone": null
+          },
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": "pass"
+            },
+            "country": "US",
+            "exp_month": 1,
+            "exp_year": 2024,
+            "fingerprint": "WDflG5ziyJYTjLy9",
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "0119",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "created": 1661411407,
+          "customer": null,
+          "livemode": false,
+          "metadata": {
+          },
+          "type": "card"
+        },
+        "type": "card_error"
+      },
+      "livemode": false,
+      "metadata": {
+        "bookingId": "fbc11e73-a490-40cc-9c1d-e851111eb951"
+      },
+      "next_action": null,
+      "on_behalf_of": null,
+      "payment_method": null,
+      "payment_method_options": {
+        "card": {
+          "installments": null,
+          "mandate_options": null,
+          "network": null,
+          "request_three_d_secure": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card"
+      ],
+      "processing": null,
+      "receipt_email": null,
+      "review": null,
+      "setup_future_usage": null,
+      "shipping": null,
+      "source": null,
+      "statement_descriptor": null,
+      "statement_descriptor_suffix": null,
+      "status": "requires_payment_method",
+      "transfer_data": null,
+      "transfer_group": null
+    }
+  },
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": {
+    "id": "req_NOIbdr4ab92jWe",
+    "idempotency_key": "e4eebc65-cc6e-45b7-81a5-6dca15e42d30"
+  },
+  "type": "payment_intent.payment_failed"
+}

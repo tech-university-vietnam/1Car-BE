@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from '../models/booking.entity';
-import { CreateBookingDTO } from '../models/booking.dto';
+import { CreateCheckoutSessionDTO } from '../../payment/models/payment.dto';
 
 @Injectable()
 export class BookingService {
@@ -13,9 +13,17 @@ export class BookingService {
     return this.repository.findOneBy({ id: id });
   }
 
-  public createBooking(body: CreateBookingDTO): Promise<Booking> {
-    const booking: Booking = new Booking();
+  public getBookingsByUserId(userId: string): Promise<Booking[]> {
+    return this.repository.findBy({ userId });
+  }
 
+  public createBooking(body: CreateCheckoutSessionDTO): Promise<Booking> {
+    const booking: Booking = new Booking();
+    booking.returnDateTime = new Date(body.returnDateTime);
+    booking.totalPrice = body.amount;
+    booking.carId = body.carId;
+    booking.userId = body.userId;
+    booking.pickUpLocationId = body.pickUpLocationId;
     return this.repository.save(booking);
   }
 }

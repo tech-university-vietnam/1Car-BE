@@ -9,6 +9,7 @@ Example:
 ```bash
 PORT=8080
 BASE_URL=localhost:8080
+CLIENT_BASE_URL=localhost:3000
 
 DATABASE_HOST=localhost
 DATABASE_NAME=nest_api

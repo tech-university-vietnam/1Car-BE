@@ -74,7 +74,6 @@ export class CarService {
       .leftJoinAndSelect('car.carSize', 'car_size')
       .getMany();
 
-    console.log(data);
     return data;
   }
 }
