@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CarAttributeType } from '../../../contains';
 import {
   Column,
   CreateDateColumn,
@@ -15,11 +16,11 @@ export class CarAttribute {
 
   @Column({ type: 'text' })
   @ApiProperty()
-  public type: string;
+  public type: CarAttributeType;
 
   @Column({ type: 'text' })
   @ApiProperty({ default: 'Audi' })
-  public name: string;
+  public value: string;
 
   @Column({ type: 'boolean', default: false })
   @ApiProperty({ default: false })

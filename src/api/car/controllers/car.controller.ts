@@ -10,8 +10,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes, ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiCreatedResponse,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { FormDataRequest } from 'nestjs-form-data';
+import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
 import { CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
@@ -25,10 +31,16 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
+  @Get('/attribute/type')
+  @ApiResponse({ type: Array<{ type: string; name: string }> })
+  getAttributeType() {
+    return this.service.getAllAttributeType();
+  }
+
   @Get('/attribute')
   getAttribute(
     @Body() data: CreateCarAttributeDto,
-    @Query('type') type?: string,
+    @Query('type') type?: CarAttributeType,
   ) {
     return this.service.getAttribute(type);
   }

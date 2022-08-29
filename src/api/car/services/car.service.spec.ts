@@ -7,7 +7,7 @@ import * as fs from 'fs';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import * as path from 'path';
 import { DataSource } from 'typeorm';
-import { CarStatus } from '../../../contains';
+import { CarAttributeType, CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
 import { Car } from '../models/car.entity';
@@ -197,18 +197,20 @@ describe('CarService', () => {
 
   it('should create an attribute and return attribute detail', async () => {
     const testAttribute: CreateCarAttributeDto = {
-      type: 'brand',
-      name: 'Ferrari',
+      type: CarAttributeType.BRAND,
+      value: 'Ferrari',
     };
 
     const attribute = await carService.createAttribute(testAttribute);
 
-    expect(attribute.name).toBe('Ferrari');
+    expect(attribute.value).toBe('Ferrari');
   });
 
   it('should return a list of car attribute', async () => {
     // 5 brand attribute that have inserted to DB
-    const listAttributeBrand = await carService.getAttribute('brand');
+    const listAttributeBrand = await carService.getAttribute(
+      CarAttributeType.BRAND,
+    );
     expect(listAttributeBrand).toHaveLength(5);
 
     // 10 attribute that have inserted to DB
@@ -239,5 +241,11 @@ describe('CarService', () => {
     } catch (err) {
       expect(err).toBeInstanceOf(BadRequestException);
     }
+  });
+
+  it('should return list of current attribute types', async () => {
+    const attributeList = carService.getAllAttributeType();
+    expect(attributeList).toHaveLength(3);
+    expect(attributeList[0]).toEqual({ type: 'brand', name: 'brand' });
   });
 });

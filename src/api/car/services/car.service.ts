@@ -1,3 +1,4 @@
+import { CarAttributeType } from './../../../contains/index';
 import {
   BadGatewayException,
   BadRequestException,
@@ -96,13 +97,20 @@ export class CarService {
     return result;
   }
 
-  public async getAttribute(type?: string) {
+  public async getAttribute(type?: CarAttributeType) {
     const filter: FindManyOptions<CarAttribute> = {};
 
-    if (type) filter.where = { type };
+    if (type) filter.where = { type: type };
 
     const result = await this.carAttributeRepository.find(filter);
 
     return result;
+  }
+
+  public getAllAttributeType(): any[] {
+    return Object.keys(CarAttributeType).map((item) => ({
+      type: CarAttributeType[item],
+      name: CarAttributeType[item],
+    }));
   }
 }

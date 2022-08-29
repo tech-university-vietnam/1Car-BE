@@ -1,9 +1,11 @@
-import { IsString } from 'class-validator';
+import { CarAttribute } from './carAttribute.entity';
+import { IsEnum, IsString } from 'class-validator';
+import { CarAttributeType } from '../../../contains';
 
 export class CreateCarAttributeDto {
   @IsString()
-  name: string;
+  value: string;
 
-  @IsString()
-  type: string;
+  @IsEnum(CarAttributeType)
+  type: CarAttributeType;
 }
