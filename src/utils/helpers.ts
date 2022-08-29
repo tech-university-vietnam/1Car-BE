@@ -2,7 +2,7 @@ import { User } from '../api/user/models/user.entity';
 import { ExecutionContext } from '@nestjs/common';
 
 export const checkUserHaveEnoughInfo = (user: User) => {
-  return user && user.dateOfBirth && user.phoneNumber && user.name;
+  return !!(user && user.dateOfBirth && user.phoneNumber && user.name);
 };
 
 export const getAuthorizationFromCtx = (ctx: ExecutionContext): string => {

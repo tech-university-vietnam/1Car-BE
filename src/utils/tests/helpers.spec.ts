@@ -8,7 +8,10 @@ import { ExecutionContext } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
 
 describe('Function check user have enough info', () => {
-  const mockUserInfo: User = new User();
+  let mockUserInfo: User;
+  beforeEach(() => {
+    mockUserInfo = new User();
+  });
   it('should return true when there is enough info', () => {
     mockUserInfo.name = 'string';
     mockUserInfo.dateOfBirth = new Date().getTime().toString();
@@ -38,7 +41,7 @@ describe('Function check user have enough info', () => {
     expect(checkUserHaveEnoughInfo(mockUserInfo)).toBe(false);
   });
 
-  it('should return false if there is no user', () => {
+  it('should return null if there is no user', () => {
     expect(checkUserHaveEnoughInfo(null)).toBe(false);
   });
 });
@@ -63,7 +66,7 @@ describe('Test getting token related to ctx', () => {
 
 describe('test get token from string', () => {
   const token = 'testJwtToken';
-  const authorizationString = `Beaer ${token}`;
+  const authorizationString = `Bearer ${token}`;
   it('return token from correct authorization string', () => {
     expect(getTokenFromAuthorizationString(authorizationString)).toEqual(token);
   });
