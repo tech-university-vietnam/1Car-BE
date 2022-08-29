@@ -75,6 +75,8 @@ describe('UserService', () => {
           email: 'test@example.com',
         }),
       );
+      const userInDb = await userService.getUser(result.id);
+      expect(userInDb).toEqual(result);
     });
   });
 });
