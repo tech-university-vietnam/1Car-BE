@@ -3,8 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestUtils } from '../../../utils/testUtils';
 import { DataSource } from 'typeorm';
-import { UserController } from '../controllers/user.controller';
-import { CreateUserDto } from '../models/user.dto';
+import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 import { User } from '../models/user.entity';
 import { UserService } from './user.service';
 
@@ -30,13 +29,11 @@ describe('UserService', () => {
         }),
         TypeOrmModule.forFeature([User]),
       ],
-      controllers: [UserController],
       providers: [UserService],
     }).compile();
 
     userService = moduleRef.get(UserService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-
     try {
       await testUtils.cleanAll(['user']);
     } catch (err) {
@@ -48,16 +45,14 @@ describe('UserService', () => {
   afterEach(async () => {
     await moduleRef.close();
   });
-
-    await testUtils.loadAll(['user']);
-  });
   it('should create a user', async () => {
-    await userService.createUser(new CreateUserDto('test@mail.com', 'test'));
-    expect(await userService.getAllUser()).toHaveLength(1);
+    const user = await userService.createUser(
+      new CreateUserDto('test@mail.com', 'test'),
+    );
+    expect(await userService.getUser(user.id)).toBeDefined();
   });
   it('should return an array of user', async () => {
-    await userService.createUser(new CreateUserDto('test2@mail.com', 'test2'));
-    expect(await userService.getAllUser()).toHaveLength(1);
+    expect(await userService.getAllUser()).toHaveLength(10);
   });
   it('should return user by inputting email', async () => {
     await userService.createUser(new CreateUserDto('test@mail.com', 'test'));
@@ -67,5 +62,20 @@ describe('UserService', () => {
     await userService.createUser(new CreateUserDto('test@mail.com', 'test'));
     const user = await userService.getUserByEmail('test@mail.com');
     expect(await userService.getUser(user.id)).toBeDefined();
+  });
+
+  it('should update exist user', async () => {
+    const email = 'test@mail.com';
+    const user = await userService.createUser(new CreateUserDto(email, 'test'));
+    const body = new UpdateUserDto(
+      'test name',
+      new Date().getUTCDate().toString(),
+      '0xxxxxx',
+    );
+    await userService.updateUser(body, email);
+    const userInfo = await userService.getUser(user.id);
+    expect(userInfo.name).not.toBeNull();
+    expect(userInfo.dateOfBirth).not.toBeNull();
+    expect(userInfo.phoneNumber).not.toBeNull();
   });
 });

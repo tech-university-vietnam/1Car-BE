@@ -37,16 +37,21 @@ export class UserService {
     body: UpdateUserDto,
     email: string,
   ): Promise<User | undefined> {
-    const user = this.getUserByEmail(email);
+    const user: User = await this.getUserByEmail(email);
     if (!user) {
       // If there is no record of this user
       // Create new record and add information
       const newUser = new User();
       newUser.email = email;
+      newUser.dateOfBirth = body.dateOfBirth;
+      newUser.phoneNumber = body.phoneNumber;
+      newUser.name = body.name;
       return await this.repository.save(newUser);
     } else {
-      const newUser = { ...user, ...body };
-      return await this.repository.save(newUser);
+      user.phoneNumber = body.phoneNumber;
+      user.name = body.name;
+      user.dateOfBirth = body.dateOfBirth;
+      return await this.repository.save(user);
     }
   }
 
