@@ -30,13 +30,13 @@ export class Booking {
   @Column('uuid')
   carId: string;
 
-  @Column('date')
+  @Column('timestamp', { nullable: true })
   @ApiProperty()
-  public receivedDateTime: string;
+  public receivedDateTime!: Date;
 
-  @Column('date')
+  @Column('timestamp')
   @ApiProperty()
-  public returnDateTime: string;
+  public returnDateTime: Date;
 
   @Column()
   @ApiProperty()
@@ -46,19 +46,19 @@ export class Booking {
   @ApiProperty({ default: 1 })
   public totalPrice: number;
 
-  @Column()
+  @Column({ nullable: true })
   @ApiProperty()
-  public discountCode: string;
+  public discountCode!: string;
 
-  @Column()
+  @Column({ nullable: true })
   @ApiProperty()
-  public transactionId: string;
+  public transactionId!: string;
 
-  @Column({ type: 'enum', enum: bookingStatus })
+  @Column({ type: 'enum', enum: bookingStatus, default: bookingStatus.PENDING })
   @ApiProperty()
   public bookingStatus: bookingStatus;
 
-  @Column({ type: 'enum', enum: pickUpStatus })
+  @Column({ type: 'enum', enum: pickUpStatus, default: pickUpStatus.PICKUP })
   @ApiProperty()
   public pickUpStatus: pickUpStatus;
 

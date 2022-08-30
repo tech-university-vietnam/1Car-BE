@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -36,11 +36,11 @@ export class User {
 
   @Column({ type: 'varchar', length: 120, nullable: true })
   @ApiProperty({ required: false, nullable: false })
-  public phoneNumber?: string = null;
+  public phoneNumber?: string;
 
   @Column({ type: 'varchar', length: 120, nullable: true })
   @ApiProperty({ required: false, nullable: false })
-  public dateOfBirth?: string = null;
+  public dateOfBirth?: string;
 
   @Column({ type: 'boolean', default: false })
   @ApiProperty({ default: false })
