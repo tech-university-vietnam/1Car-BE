@@ -56,6 +56,7 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
           request.auth = {
             token,
             email,
+            userId: user.id,
           };
         } else {
           const isMissingInfo = checkUserHaveEnoughInfo(user);

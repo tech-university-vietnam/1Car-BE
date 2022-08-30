@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  ExecutionContext,
   Get,
   Inject,
   Param,
@@ -17,7 +16,6 @@ import { UserService } from '../services/user.service';
 import { Public } from '../../../decorators/public.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 @ApiTags('user')
@@ -29,11 +27,11 @@ export class UserController {
   /**
    * Get user by ID
    * @param id: userId store in database
+   * @param req: Express express
    */
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   public getUser(@Param('id') id: string, @Req() req: Request): Promise<User> {
-    console.log(req);
     return this.service.getUser(id);
   }
 
@@ -43,8 +41,8 @@ export class UserController {
    */
   @UseGuards(JwtAuthGuard)
   @Get()
-  public getUserByAuthorization(@Req() req: Request) {
-    return this.service.getUserByEmail(req.auth.email);
+  public async getUserByAuthorization(@Req() req: Request) {
+    return await this.service.getUserByEmail(req.auth.email);
   }
 
   // This is a public api
@@ -56,26 +54,26 @@ export class UserController {
   @Public()
   @Post()
   @ApiCreatedResponse({ type: User })
-  public createUser(@Body() body: CreateUserDto): Promise<User> {
-    return this.service.createUser(body);
+  public async createUser(@Body() body: CreateUserDto): Promise<User> {
+    return await this.service.createUser(body);
   }
 
   /**
    * Update user information from pop up form
    * @param body: Request body
-   * @param token
+   * @param req Express request
    */
   @Patch()
-  public updateUser(
+  public async updateUser(
     @Body()
     body: UpdateUserDto,
     @Req() req: Request,
   ): Promise<User> {
-    return this.service.updateUser(body, req.auth.email);
+    return await this.service.updateUser(body, req.auth.email);
   }
 
   @Get('is-first-time')
-  public isUserFirstTime(@Req() req: Request): Promise<boolean> {
-    return this.service.isUserFirstTime(req.auth.email);
+  public async isUserFirstTime(@Req() req: Request): Promise<boolean> {
+    return await this.service.isUserFirstTime(req.auth.email);
   }
 }

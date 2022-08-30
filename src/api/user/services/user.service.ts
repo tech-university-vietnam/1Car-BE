@@ -46,7 +46,7 @@ export class UserService {
       newUser.dateOfBirth = body.dateOfBirth;
       newUser.phoneNumber = body.phoneNumber;
       newUser.name = body.name;
-      return await this.repository.save(newUser);
+      return this.repository.create(newUser);
     } else {
       user.phoneNumber = body.phoneNumber;
       user.name = body.name;

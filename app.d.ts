@@ -4,6 +4,7 @@ declare namespace Express {
     auth: {
       token: string;
       email: string;
+      userId: string;
     };
   }
 }
