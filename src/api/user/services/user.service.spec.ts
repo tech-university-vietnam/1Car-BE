@@ -1,12 +1,11 @@
-import { UserService } from './user.service';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
-import { UserController } from '../controllers/user.controller';
+import { DataSource } from 'typeorm';
+import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 import { User } from '../models/user.entity';
-import { CreateUserDto } from '../models/user.dto';
+import { UserService } from './user.service';
 
 describe('UserService', () => {
   let moduleRef: TestingModule;
@@ -30,13 +29,11 @@ describe('UserService', () => {
         }),
         TypeOrmModule.forFeature([User]),
       ],
-      controllers: [UserController],
       providers: [UserService],
     }).compile();
 
     userService = moduleRef.get(UserService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-
     try {
       await testUtils.cleanAll(['user']);
     } catch (err) {
@@ -48,35 +45,37 @@ describe('UserService', () => {
   afterEach(async () => {
     await moduleRef.close();
   });
-
-  describe('getUser', () => {
-    it('should return an with corresponding id', async () => {
-      expect(
-        await userService.getUser('6ca40044-3f91-4805-bbf9-3efb97c7fe3c'),
-      ).toHaveProperty('name', 'Kiskadee, great');
-    });
-    it('handles case with no user found', async () => {
-      const result = await userService.getUser(
-        '6ca40044-3f91-4805-bbf9-3efb97c7fe3a',
-      );
-      expect(result).toBeNull();
-    });
+  it('should create a user', async () => {
+    const user = await userService.createUser(
+      new CreateUserDto('test@mail.com', 'test'),
+    );
+    expect(await userService.getUser(user.id)).toBeDefined();
+  });
+  it('should return an array of user', async () => {
+    expect(await userService.getAllUser()).toHaveLength(10);
+  });
+  it('should return user by inputting email', async () => {
+    await userService.createUser(new CreateUserDto('test@mail.com', 'test'));
+    expect(await userService.getUserByEmail('test@mail.com')).toBeDefined();
+  });
+  it('should return user by inputting id', async () => {
+    await userService.createUser(new CreateUserDto('test@mail.com', 'test'));
+    const user = await userService.getUserByEmail('test@mail.com');
+    expect(await userService.getUser(user.id)).toBeDefined();
   });
 
-  // describe('createUser', () => {
-  //   it('should return created user', async () => {
-  //     const testUser = new CreateUserDto();
-  //     testUser.name = 'Testy McTest';
-  //     testUser.email = 'test@example.com';
-  //     const result = await userService.createUser(testUser);
-  //     expect(result).toEqual(
-  //       expect.objectContaining({
-  //         name: 'Testy McTest',
-  //         email: 'test@example.com',
-  //       }),
-  //     );
-  //     const userInDb = await userService.getUser(result.id);
-  //     expect(userInDb).toEqual(result);
-  //   });
-  // });
+  it('should update exist user', async () => {
+    const email = 'test@mail.com';
+    const user = await userService.createUser(new CreateUserDto(email, 'test'));
+    const body = new UpdateUserDto(
+      'test name',
+      new Date().getUTCDate().toString(),
+      '0xxxxxx',
+    );
+    await userService.updateUser(body, email);
+    const userInfo = await userService.getUser(user.id);
+    expect(userInfo.name).not.toBeNull();
+    expect(userInfo.dateOfBirth).not.toBeNull();
+    expect(userInfo.phoneNumber).not.toBeNull();
+  });
 });
