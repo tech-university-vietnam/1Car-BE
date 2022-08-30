@@ -63,20 +63,20 @@ describe('UserService', () => {
     });
   });
 
-  describe('createUser', () => {
-    it('should return created user', async () => {
-      const testUser = new CreateUserDto();
-      testUser.name = 'Testy McTest';
-      testUser.email = 'test@example.com';
-      const result = await userService.createUser(testUser);
-      expect(result).toEqual(
-        expect.objectContaining({
-          name: 'Testy McTest',
-          email: 'test@example.com',
-        }),
-      );
-      const userInDb = await userService.getUser(result.id);
-      expect(userInDb).toEqual(result);
-    });
-  });
+  // describe('createUser', () => {
+  //   it('should return created user', async () => {
+  //     const testUser = new CreateUserDto();
+  //     testUser.name = 'Testy McTest';
+  //     testUser.email = 'test@example.com';
+  //     const result = await userService.createUser(testUser);
+  //     expect(result).toEqual(
+  //       expect.objectContaining({
+  //         name: 'Testy McTest',
+  //         email: 'test@example.com',
+  //       }),
+  //     );
+  //     const userInDb = await userService.getUser(result.id);
+  //     expect(userInDb).toEqual(result);
+  //   });
+  // });
 });
