@@ -1,4 +1,4 @@
-import { CarAttributeType } from './../../../contains/index';
+import { CarAttributeType, CarStatus } from './../../../contains/index';
 import {
   BadGatewayException,
   BadRequestException,
@@ -9,7 +9,7 @@ import axios from 'axios';
 import * as FormData from 'form-data';
 import * as _ from 'lodash';
 import { FindManyOptions, In, Repository } from 'typeorm';
-import { CreateCarDTO } from '../models/car.dto';
+import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from './../models/carAttribute.entity';
@@ -48,10 +48,23 @@ export class CarService {
     return this.carRepository.save(car);
   }
 
-  public async getAllCar(): Promise<Car[]> {
+  public async getAllCar(
+    filter: CarFilterDto = {
+      locationId: '',
+      page: 1,
+      limit: 10,
+      startDate: '',
+      endDate: '',
+    },
+  ): Promise<Car[]> {
+    //TODO: check startDate & endDate here
     const data = await this.carRepository
       .createQueryBuilder('car')
+      .where('car.status = :status', { status: CarStatus.AVAILABLE })
+      .orderBy('car.createdAt', 'DESC')
       .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .take(filter.limit || 10)
+      .skip((filter.limit || 10) * ((filter.page || 1) - 1))
       .getMany();
 
     return data;

@@ -10,6 +10,7 @@ import { DataSource } from 'typeorm';
 import { CarAttributeType, CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
+import { CarFilterDto } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
@@ -247,5 +248,83 @@ describe('CarService', () => {
     const attributeList = carService.getAllAttributeType();
     expect(attributeList).toHaveLength(3);
     expect(attributeList[0]).toEqual({ type: 'brand', name: 'brand' });
+  });
+
+  it('should return list of 1 car with status Available by default', async () => {
+    const unavailableCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.UN_AVAILABLE,
+    };
+
+    // now we have 2 cars, one from mock and one from creation bellow
+    await carService.createCar(unavailableCar, []);
+
+    const filter = undefined;
+
+    const cars = await carService.getAllCar(filter);
+
+    expect(cars).toHaveLength(1);
+    cars.forEach((item) => expect(item.status).toBe(CarStatus.AVAILABLE));
+  });
+
+  it('should return list of 2 cars with status Available by default', async () => {
+    const availableCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+
+    // now we have 2 cars, one from mock and one from creation bellow
+    await carService.createCar(availableCar, []);
+
+    const filter = undefined;
+
+    const cars = await carService.getAllCar(filter);
+
+    expect(cars).toHaveLength(2);
+    cars.forEach((item) => expect(item.status).toBe(CarStatus.AVAILABLE));
+  });
+
+  it('should return list of 1 cars with status Available with page = 2, limit = 1', async () => {
+    const availableCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+
+    // now we have 2 cars, one from mock and one from creation bellow
+    await carService.createCar(availableCar, []);
+
+    const filter = { page: 2, limit: 1 };
+    const cars = await carService.getAllCar(filter);
+
+    expect(cars).toHaveLength(1);
+    cars.forEach((item) => expect(item.status).toBe(CarStatus.AVAILABLE));
+    expect(cars[0].name).toBe('New Car 1');
   });
 });

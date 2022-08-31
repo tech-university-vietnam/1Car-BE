@@ -16,10 +16,11 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { filter } from 'lodash';
 import { FormDataRequest } from 'nestjs-form-data';
 import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
-import { CreateCarDTO } from '../models/car.dto';
+import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
@@ -38,10 +39,7 @@ export class CarController {
   }
 
   @Get('/attribute')
-  getAttribute(
-    @Body() data: CreateCarAttributeDto,
-    @Query('type') type?: CarAttributeType,
-  ) {
+  getAttribute(@Query('type') type?: CarAttributeType) {
     return this.service.getAttribute(type);
   }
 
@@ -78,7 +76,7 @@ export class CarController {
   }
 
   @Get()
-  public getAllCar(): Promise<Car[]> {
-    return this.service.getAllCar();
+  public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
+    return this.service.getAllCar(filter);
   }
 }

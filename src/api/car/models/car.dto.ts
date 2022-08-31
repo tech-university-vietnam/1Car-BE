@@ -1,5 +1,14 @@
 import { Type } from 'class-transformer';
-import { IsIn, IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+} from 'class-validator';
 import {
   HasMimeType,
   IsFile,
@@ -43,4 +52,30 @@ export class CreateCarDTO {
 
   @IsUUID('all', { each: true })
   attributes: string[];
+}
+
+export class CarFilterDto {
+  @IsString()
+  @IsOptional()
+  locationId?: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  page?: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  limit?: number;
+
+  @IsDateString()
+  @IsOptional()
+  startDate?: string;
+
+  @IsDateString()
+  @IsOptional()
+  endDate?: string;
 }
