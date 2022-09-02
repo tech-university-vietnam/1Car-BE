@@ -57,12 +57,37 @@ export class CarService {
       endDate: '',
     },
   ): Promise<Car[]> {
+    const attributeFromQuery = Object.keys(CarAttributeType)
+      .map((item) => ({
+        type: CarAttributeType[item],
+        value: filter[CarAttributeType[item]],
+      }))
+      .filter((item) => item.value != undefined);
+
+    const attributeType = attributeFromQuery.map((item) => item.type);
+
+    const queryForAttribute =
+      attributeType.length > 0
+        ? attributeType
+            .map(
+              (type) =>
+                `car_attribute.type = '${type}' and car_attribute.value = :${type}`,
+            )
+            .join(' or ')
+        : '1 = 1';
+
+    const paramsForAttribute =
+      attributeType.length > 0
+        ? Object.fromEntries(attributeType.map((key) => [key, filter[key]]))
+        : {};
+
     //TODO: check startDate & endDate here
     const data = await this.carRepository
       .createQueryBuilder('car')
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .orderBy('car.createdAt', 'DESC')
       .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .andWhere(queryForAttribute, paramsForAttribute)
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))
       .getMany();

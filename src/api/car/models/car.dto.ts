@@ -78,4 +78,16 @@ export class CarFilterDto {
   @IsDateString()
   @IsOptional()
   endDate?: string;
+
+  @IsString()
+  @IsOptional()
+  brand?: string;
+
+  @IsString()
+  @IsOptional()
+  type?: string;
+
+  @IsString()
+  @IsOptional()
+  size?: string;
 }

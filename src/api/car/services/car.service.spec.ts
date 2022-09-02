@@ -327,4 +327,52 @@ describe('CarService', () => {
     cars.forEach((item) => expect(item.status).toBe(CarStatus.AVAILABLE));
     expect(cars[0].name).toBe('New Car 1');
   });
+
+  it('should return list of 1 car with brand = "350Z"', async () => {
+    const availableCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+
+    await carService.createCar(availableCar, []);
+
+    const filter = { brand: '350Z' };
+    const cars = await carService.getAllCar(filter);
+
+    expect(cars).toHaveLength(1);
+    cars.forEach((item) => expect(item.attributes[0].type).toBe('brand'));
+    cars.forEach((item) => expect(item.attributes[0].value).toBe('350Z'));
+  });
+
+  it('should return empty with brand = "350Z-fake"', async () => {
+    const availableCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+
+    await carService.createCar(availableCar, []);
+
+    const filter = { brand: '350Z-fake' };
+    const cars = await carService.getAllCar(filter);
+
+    expect(cars).toHaveLength(0);
+  });
 });
