@@ -15,7 +15,7 @@ describe('CarService', () => {
   let carService: CarService;
   let testUtils: TestUtils;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.test' }),
@@ -26,6 +26,8 @@ describe('CarService', () => {
           username: process.env.DATABASE_USER,
           password: process.env.DATABASE_PASSWORD,
           database: process.env.DATABASE_NAME,
+          migrations: ['dist/src/migrations/*.{ts,js}'],
+          migrationsRun: true,
           autoLoadEntities: true,
           synchronize: true,
           dropSchema: true,
@@ -35,7 +37,6 @@ describe('CarService', () => {
         TypeOrmModule.forFeature([CarSize]),
         TypeOrmModule.forFeature([CarBrand]),
       ],
-      controllers: [CarController],
       providers: [CarService],
     }).compile();
 
@@ -43,9 +44,9 @@ describe('CarService', () => {
     testUtils = new TestUtils(moduleRef.get(DataSource));
     await testUtils.cleanAll(['car']);
     await testUtils.loadAll(['car_brand', 'car_size', 'car_type', 'car']);
-  });
+  }, 15000);
 
-  afterEach(async () => {
+  afterAll(async () => {
     await moduleRef.close();
   });
 
