@@ -17,7 +17,7 @@ import {
 } from '../../../utils/helpers';
 import { ExceptionMessage } from '../constants';
 import { AuthService } from '../services/auth.service';
-import { CreateUserDto } from 'src/api/user/models/user.dto';
+import { CreateUserDto } from '../../user/models/user.dto';
 
 // Return unauthorized in case that is truly unauthorized,
 // Return Bad Request if there is missing info
