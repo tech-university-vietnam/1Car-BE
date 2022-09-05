@@ -66,7 +66,7 @@ export class UserController {
   /**
    * Use to integrate with Auth0
    * Create user only by email
-   * @param body: {emai: string}
+   * @param body: {email: string, name: string}
    */
   @Public()
   @Post()
