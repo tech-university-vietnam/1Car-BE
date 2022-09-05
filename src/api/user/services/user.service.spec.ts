@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestUtils } from '../../../utils/testUtils';
 import { DataSource } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
-import { User } from '../models/user.entity';
+import { User, UserRole } from '../models/user.entity';
 import { UserService } from './user.service';
 
 describe('UserService', () => {
@@ -76,5 +76,22 @@ describe('UserService', () => {
     expect(userInfo.name).not.toBeNull();
     expect(userInfo.dateOfBirth).not.toBeNull();
     expect(userInfo.phoneNumber).not.toBeNull();
+  });
+
+  it('test create admin with email', async () => {
+    const email = 'admin@mail.com';
+    const admin = await userService.createAdmin(email);
+    expect(admin).toBeInstanceOf(User);
+    expect(admin.userRole).toBe(UserRole.ADMIN);
+  });
+
+  it('test update while no user', async () => {
+    const dto = new UpdateUserDto('name', '1990-01-01', '32902xxxx');
+    const email = 'randomemail@email.com';
+    const user = await userService.updateUser(dto, email);
+    expect(user).toBeInstanceOf(User);
+    expect(user.dateOfBirth).toBeDefined();
+    expect(user.phoneNumber).toBeDefined();
+    expect(user.name).toBe('name');
   });
 });

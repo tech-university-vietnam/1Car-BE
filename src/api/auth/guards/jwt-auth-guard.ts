@@ -17,7 +17,7 @@ import {
 } from '../../../utils/helpers';
 import { ExceptionMessage } from '../constants';
 import { AuthService } from '../services/auth.service';
-import { CreateUserDto } from '../../../api/user/models/user.dto';
+import { CreateUserDto } from '../../user/models/user.dto';
 
 // Return unauthorized in case that is truly unauthorized,
 // Return Bad Request if there is missing info
@@ -50,6 +50,7 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
         const request: Request = ctx.switchToHttp().getRequest();
 
         const decodedToken = this.authService.decodeTokenToObject(token);
+        if (!decodedToken) return false;
         const email = this.authService.fromTokenGetEmail(decodedToken);
         user = await this.userService.getUserByEmail(email);
         if (user) {
@@ -66,7 +67,7 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
               HttpStatus.BAD_REQUEST,
             );
           } else {
-            this.userService.createUser(new CreateUserDto(email, email));
+            await this.userService.createUser(new CreateUserDto(email, email));
             err = new HttpException(
               ExceptionMessage.USER_NEED_UPDATE_INFO,
               HttpStatus.BAD_REQUEST,

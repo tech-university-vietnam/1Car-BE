@@ -9,6 +9,7 @@ async function bootstrap() {
   const app: NestExpressApplication = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+  app.enableCors();
   const config: ConfigService = app.get(ConfigService);
   const port: number = config.get<number>('PORT');
   app.enableCors();
