@@ -1,3 +1,15 @@
+import { IsString, IsUUID } from 'class-validator';
+
 export class CreateBookingDTO {
-  amount: number;
+  @IsUUID()
+  public carId: string;
+
+  @IsString()
+  public returnDateTime: string;
+
+  @IsString()
+  public receivedDateTime: string;
+
+  @IsUUID()
+  public pickUpLocationId: string;
 }

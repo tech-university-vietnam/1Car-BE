@@ -8,9 +8,9 @@ export const connectionSource = new DataSource({
   password: 'admin',
   database: 'migration',
   logging: false,
-  synchronize: true,
+  synchronize: false,
   name: 'default',
-  entities: ['dist/src/**/**.entity{.ts,.js}'],
-  migrations: ['dist/src/migrations/*.{ts,js}'],
+  entities: ['dist/**/**.entity{.ts,.js}'],
+  migrations: ['dist/migrations/*.{ts,js}'],
   subscribers: [],
 });

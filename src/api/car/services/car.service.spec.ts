@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
-import { CarController } from '../controllers/car.controller';
 import { Car } from '../models/car.entity';
 import { CarBrand } from '../models/carBrand.entity';
 import { CarSize } from '../models/carSize.entity';
@@ -26,7 +25,7 @@ describe('CarService', () => {
           username: process.env.DATABASE_USER,
           password: process.env.DATABASE_PASSWORD,
           database: process.env.DATABASE_NAME,
-          migrations: ['dist/src/migrations/*.{ts,js}'],
+          migrations: ['dist/migrations/*.{ts,js}'],
           migrationsRun: true,
           autoLoadEntities: true,
           synchronize: true,

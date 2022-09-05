@@ -13,6 +13,7 @@ import { DataSource, Repository } from 'typeorm';
 import utils from '../../../utils/utils';
 import { Booking, bookingStatus } from '../../booking/models/booking.entity';
 import { BookingService } from '../../booking/services/booking.service';
+import { CarService } from '../../car/services/car.service';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { Payment } from '../models/payment.entity';
 import { StripeService } from './stripe.service';
@@ -30,21 +31,27 @@ export class PaymentService {
   @Inject(StripeService)
   private readonly stripeService: StripeService;
 
+  @Inject(CarService)
+  private readonly carService: CarService;
+
   @Inject(DataSource)
   private readonly dataSource: DataSource;
 
   @Inject(ConfigService)
   private readonly config: ConfigService;
 
-  public async createCheckoutSession(body: CreateCheckoutSessionDTO) {
+  public async createCheckoutSession(
+    body: CreateCheckoutSessionDTO,
+    request: Request,
+  ) {
     // Create booking in our DB
-    const booking = await this.bookingService.createBooking(body);
-
+    const booking = await this.bookingService.createBooking(body, request);
+    const car = await this.carService.getCar(body.carId);
     return await this.stripeService.createCheckoutSession(
-      body.amount,
+      booking.totalPrice,
       `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
       `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
-      'BMW',
+      car.name,
       booking.id,
     );
   }
