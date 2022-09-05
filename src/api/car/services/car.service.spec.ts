@@ -1,4 +1,8 @@
-import { BadGatewayException, BadRequestException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,7 +10,7 @@ import axios from 'axios';
 import * as fs from 'fs';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import * as path from 'path';
-import { DataSource } from 'typeorm';
+import { DataSource, QueryFailedError } from 'typeorm';
 import { CarAttributeType, CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
@@ -86,6 +90,12 @@ describe('CarService', () => {
     expect(attributes).toEqual(
       expect.objectContaining({ brand: '350Z', type: 'S-Class' }),
     );
+  });
+
+  it('should throw expection if car not found', async () => {
+    await expect(
+      carService.getCarAttributes('477004fa-bcb1-4abd-83ee-c99175532c17'),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should return an array of cars', async () => {
