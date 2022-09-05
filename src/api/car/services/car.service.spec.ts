@@ -24,6 +24,7 @@ describe('CarService', () => {
   let testUtils: TestUtils;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     moduleRef = await Test.createTestingModule({
       imports: [
         NestjsFormDataModule,
@@ -38,7 +39,6 @@ describe('CarService', () => {
           database: process.env.DATABASE_NAME,
           autoLoadEntities: true,
           synchronize: true,
-          dropSchema: true,
         }),
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
@@ -59,8 +59,8 @@ describe('CarService', () => {
   });
 
   afterEach(async () => {
-    await moduleRef.close();
     jest.clearAllMocks();
+    await moduleRef.close();
   });
 
   it('should return an array of cars', async () => {
