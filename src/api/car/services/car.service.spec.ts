@@ -63,6 +63,31 @@ describe('CarService', () => {
     await moduleRef.close();
   });
 
+  it('should return the car id after creating the car, and can get all car attributes from car id', async () => {
+    const uuid_regex =
+      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    const newCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '477004fa-bcb1-4abd-83ee-c99175532c17',
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+    const Car = await carService.createCar(newCar, []);
+    const carId = Car.id;
+    expect(carId).toEqual(expect.stringMatching(uuid_regex));
+    const attributes = await carService.getCarAttributes(carId);
+    expect(attributes).toEqual(
+      expect.objectContaining({ brand: '350Z', type: 'S-Class' }),
+    );
+  });
+
   it('should return an array of cars', async () => {
     expect(await carService.getAllCar()).toHaveLength(1);
   });

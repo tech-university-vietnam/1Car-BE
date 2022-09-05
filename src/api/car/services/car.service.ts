@@ -3,6 +3,7 @@ import {
   BadGatewayException,
   BadRequestException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import axios from 'axios';
@@ -13,6 +14,7 @@ import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from './../models/carAttribute.entity';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class CarService {
@@ -93,6 +95,23 @@ export class CarService {
       .getMany();
 
     return data;
+  }
+
+  public async getCarAttributes(id: string) {
+    const data = await this.carRepository
+      .createQueryBuilder('car')
+      .where('car.id = :id', { id })
+      .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .getOne();
+
+    if (!data) {
+      throw new NotFoundException('car not found');
+    }
+
+    return data.attributes.reduce((accum, attribute) => {
+      accum[attribute.type] = attribute.value;
+      return accum;
+    }, {});
   }
 
   public async uploadImage(file: Buffer) {
