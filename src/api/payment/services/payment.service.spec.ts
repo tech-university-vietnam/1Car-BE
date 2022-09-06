@@ -5,7 +5,6 @@ import { Booking, bookingStatus } from '../../booking/models/booking.entity';
 import { BookingService } from '../../booking/services/booking.service';
 import { DataSource } from 'typeorm';
 import { TestUtils } from '../../../utils/testUtils';
-import { PaymentController } from '../controllers/payment.controller';
 import { Payment } from '../models/payment.entity';
 import { PaymentService } from './payment.service';
 import { StripeService } from './stripe.service';
@@ -15,13 +14,12 @@ import { Request } from 'express';
 import utils from '../../../utils/utils';
 import { CarService } from '../../car/services/car.service';
 import { Car } from '../../car/models/car.entity';
-import { CarType } from '../../car/models/carType.entity';
-import { CarSize } from '../../car/models/carSize.entity';
-import { CarBrand } from '../../car/models/carBrand.entity';
-import { UserService } from '../../user/services/user.service';
 import { User } from '../../user/models/user.entity';
-import { AuthService } from '../../auth/services/auth.service';
-import { JwtService } from '@nestjs/jwt';
+import { CarAttribute } from '../../car/models/carAttribute.entity';
+import { AuthModule } from '../../auth/auth.module';
+import { UserModule } from '../../user/user.module';
+import { CarModule } from '../../car/car.module';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 describe('PaymentService', () => {
   let moduleRef: TestingModule;
@@ -31,11 +29,17 @@ describe('PaymentService', () => {
   let carService: CarService;
   let stripeService: StripeService;
   let bookingRequest, userRequest;
-
-  beforeAll(async () => {
+  const mockedCar = {
+    id: '3926cd59-cd4b-4bbc-821d-21800019780f',
+    name: 'New Car 1',
+    description: 'New Car',
+  };
+  beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
       imports: [
+        NestjsFormDataModule,
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.test' }),
+        NestjsFormDataModule.config({ storage: MemoryStoredFile }),
         TypeOrmModule.forRoot({
           type: 'postgres',
           host: process.env.DATABASE_HOST,
@@ -43,69 +47,43 @@ describe('PaymentService', () => {
           username: process.env.DATABASE_USER,
           password: process.env.DATABASE_PASSWORD,
           database: process.env.DATABASE_NAME,
-          migrations: ['dist/migrations/*.{ts,js}'],
-          migrationsRun: true,
           autoLoadEntities: true,
           synchronize: true,
-          dropSchema: true,
         }),
-        TypeOrmModule.forFeature([Booking]),
+        AuthModule,
+        UserModule,
+        CarModule,
         TypeOrmModule.forFeature([Payment]),
-        TypeOrmModule.forFeature([Car]),
-        TypeOrmModule.forFeature([CarType]),
-        TypeOrmModule.forFeature([CarSize]),
-        TypeOrmModule.forFeature([CarBrand]),
         TypeOrmModule.forFeature([User]),
+        TypeOrmModule.forFeature([Booking]),
+        TypeOrmModule.forFeature([Car]),
+        TypeOrmModule.forFeature([CarAttribute]),
       ],
-      controllers: [PaymentController],
-      providers: [
-        UserService,
-        AuthService,
-        JwtService,
-        PaymentService,
-        BookingService,
-        StripeService,
-        CarService,
-      ],
+      providers: [PaymentService, BookingService, StripeService],
     }).compile();
     stripeService = moduleRef.get(StripeService);
     paymentService = moduleRef.get(PaymentService);
     bookingService = moduleRef.get(BookingService);
     carService = moduleRef.get(CarService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-  }, 15000);
-
-  beforeEach(async () => {
-    jest.restoreAllMocks();
-    await testUtils.cleanAll([
-      'booking',
-      'payment',
-      'car_type',
-      'car_size',
-      'car_brand',
-      'car',
-    ]);
-    await testUtils.loadAll([
-      'booking',
-      'payment',
-      'car_type',
-      'car_size',
-      'car_brand',
-      'car',
-    ]);
-    const carId = (await carService.getAllCar())[0].id;
+    await testUtils.cleanAll(['booking', 'payment']);
+    await testUtils.loadAll(['booking', 'payment']);
+    jest
+      .spyOn(carService, 'getCar')
+      .mockImplementation(() => Promise.resolve(mockedCar as Car));
     bookingRequest = {
       userId: '63c4f298-a75e-424e-998e-55f396a97d61',
-      carId: carId,
+      carId: mockedCar.id,
       returnDateTime: '2018-01-15T08:54:45.000Z',
       receivedDateTime: '2018-01-25T08:54:45.000Z',
       amount: 4000,
       pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
     };
     userRequest = utils.loadJson('mocked_request');
-  }, 15000);
+  });
 
-  afterAll(async () => {
+  afterEach(async () => {
+    jest.clearAllMocks();
     await moduleRef.close();
   });
 

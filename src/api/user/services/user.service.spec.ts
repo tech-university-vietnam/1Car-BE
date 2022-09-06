@@ -13,6 +13,7 @@ describe('UserService', () => {
   let testUtils: TestUtils;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     moduleRef = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.test' }),
@@ -25,7 +26,6 @@ describe('UserService', () => {
           database: process.env.DATABASE_NAME,
           autoLoadEntities: true,
           synchronize: true,
-          dropSchema: true,
         }),
         TypeOrmModule.forFeature([User]),
       ],
@@ -34,17 +34,16 @@ describe('UserService', () => {
 
     userService = moduleRef.get(UserService);
     testUtils = new TestUtils(moduleRef.get(DataSource));
-    try {
-      await testUtils.cleanAll(['user']);
-    } catch (err) {
-    } finally {
-      await testUtils.loadAll(['user']);
-    }
+
+    await testUtils.cleanAll(['user']);
+    await testUtils.loadAll(['user']);
   });
 
   afterEach(async () => {
+    jest.clearAllMocks();
     await moduleRef.close();
   });
+
   it('should create a user', async () => {
     const user = await userService.createUser(
       new CreateUserDto('test@mail.com', 'test'),
@@ -65,7 +64,7 @@ describe('UserService', () => {
   });
 
   it('should update exist user', async () => {
-    const email = 'test@mail.com';
+    const email = 'test1@mail.com';
     const user = await userService.createUser(new CreateUserDto(email, 'test'));
     const body = new UpdateUserDto(
       'test name',

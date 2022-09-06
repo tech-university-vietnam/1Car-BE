@@ -1,21 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { CarAttributeType } from '../../../contains';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class CarType {
+export class CarAttribute {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
   public id!: string;
 
   @Column({ type: 'text' })
-  @ApiProperty({ default: 'SUV' })
-  public name: string;
+  @ApiProperty()
+  public type: CarAttributeType;
+
+  @Column({ type: 'text' })
+  @ApiProperty({ default: 'Audi' })
+  public value: string;
 
   @Column({ type: 'boolean', default: false })
   @ApiProperty({ default: false })

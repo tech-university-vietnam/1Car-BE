@@ -1,18 +1,20 @@
-import { CarSize } from './models/carSize.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { CarController } from './controllers/car.controller';
 import { Car } from './models/car.entity';
-import { CarType } from './models/carType.entity';
+import { CarAttribute } from './models/carAttribute.entity';
 import { CarService } from './services/car.service';
-import { CarBrand } from './models/carBrand.entity';
 
 @Module({
   imports: [
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     TypeOrmModule.forFeature([Car]),
-    TypeOrmModule.forFeature([CarType]),
-    TypeOrmModule.forFeature([CarSize]),
-    TypeOrmModule.forFeature([CarBrand]),
+    TypeOrmModule.forFeature([CarAttribute]),
+  ],
+  exports: [
+    CarService,
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
   ],
   controllers: [CarController],
   providers: [CarService],
