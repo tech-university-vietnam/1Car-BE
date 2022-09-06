@@ -6,9 +6,11 @@ import {
   RawBodyRequest,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { PaymentService } from '../services/payment.service';
 
@@ -18,13 +20,15 @@ export class PaymentController {
   @Inject(PaymentService)
   private readonly service: PaymentService;
 
+  @UseGuards(JwtAuthGuard)
   @Post('/checkout')
   @ApiCreatedResponse()
   public async createCheckoutSession(
     @Body() body: CreateCheckoutSessionDTO,
     @Res() res: Response,
+    @Req() req: Request,
   ) {
-    const session = await this.service.createCheckoutSession(body);
+    const session = await this.service.createCheckoutSession(body, req);
     return res.redirect(session.url);
   }
 

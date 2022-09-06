@@ -45,7 +45,6 @@ describe('CarService', () => {
         TypeOrmModule.forFeature([CarAttribute]),
         TypeOrmModule.forFeature([CarAttributeType]),
       ],
-      controllers: [CarController],
       providers: [CarService],
     }).compile();
 

@@ -30,7 +30,7 @@ export class StripeService {
             product_data: {
               name: carName,
             },
-            unit_amount: amount,
+            unit_amount: amount * 100,
           },
           quantity: 1,
         },

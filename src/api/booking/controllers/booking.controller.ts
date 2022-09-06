@@ -1,9 +1,19 @@
-import { Body, Controller, Get, Inject, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Booking } from '../models/booking.entity';
-import { CreateBookingDTO } from '../models/booking.dto';
 import { BookingService } from '../services/booking.service';
-import { CreateCheckoutSessionDTO } from '../../payment/models/payment.dto';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
+import { Request } from 'express';
+import { CreateBookingDTO } from '../models/booking.dto';
 
 @Controller('booking')
 @ApiTags('booking')
@@ -16,11 +26,13 @@ export class BookingController {
     return this.service.getBooking(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: Booking })
-  public createBooking(
-    @Body() body: CreateCheckoutSessionDTO,
+  public async createBooking(
+    @Req() request: Request,
+    @Body() body: CreateBookingDTO,
   ): Promise<Booking> {
-    return this.service.createBooking(body);
+    return await this.service.createBooking(body, request);
   }
 }
