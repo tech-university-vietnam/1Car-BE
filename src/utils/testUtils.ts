@@ -31,9 +31,10 @@ export class TestUtils {
     try {
       for (const entity of entities) {
         const repository = await this.databaseService.getRepository(entity);
-        await repository.query(`TRUNCATE TABLE ${entity} CASCADE;`);
+        await repository.query(`TRUNCATE TABLE "${entity}" CASCADE;`);
       }
     } catch (error) {
+      console.log(error);
       throw new Error(`ERROR: Cleaning test db: ${error}`);
     }
   }
