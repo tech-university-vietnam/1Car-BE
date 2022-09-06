@@ -68,33 +68,16 @@ export class CarService {
       endDate: '',
     },
   ): Promise<Car[]> {
-    // const attributeFromQuery = Object.keys(CarAttributeType)
-    //   .map((item) => ({
-    //     type: CarAttributeType[item],
-    //     value: filter[CarAttributeType[item]],
-    //   }))
-    //   .filter((item) => item.value != undefined);
-
-    // const attributeType = attributeFromQuery.map((item) => item.type);
-
-    // const queryForAttribute =
-    //   attributeType.length > 0
-    //     ? attributeType
-    //         .map(
-    //           (type) =>
-    //             `car_attribute.type = '${type}' and car_attribute.value = :${type}`,
-    //         )
-    //         .join(' or ')
-    //     : '1 = 1';
-
-    // const paramsForAttribute =
-    //   attributeType.length > 0
-    //     ? Object.fromEntries(attributeType.map((key) => [key, filter[key]]))
-    //     : {};
-
     if (typeof filter?.attribute == 'string') {
       filter.attribute = [filter.attribute];
     }
+
+    const queryForAttribute =
+      filter.attribute?.length > 0
+        ? filter.attribute
+            .map((id) => `car_attribute.id = '${id}'`)
+            .join(' and ')
+        : '1 = 1';
 
     //TODO: check startDate & endDate here
     const data = await this.carRepository
@@ -103,14 +86,7 @@ export class CarService {
       .orderBy('car.createdAt', 'DESC')
       .leftJoinAndSelect('car.attributes', 'car_attribute')
       .leftJoinAndSelect('car_attribute.type', 'type')
-      .andWhere(
-        filter.attribute?.length > 0
-          ? 'car_attribute.id IN(:...attributes)'
-          : '1 = 1',
-        {
-          attributes: filter.attribute,
-        },
-      )
+      .andWhere(queryForAttribute)
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))
       .getMany();
