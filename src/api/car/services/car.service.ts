@@ -1,5 +1,4 @@
-import { BookedRecord } from './../../booking/models/bookedRecord.entity';
-import { CarAttributeType, CarStatus } from './../../../contains/index';
+import { CarStatus } from './../../../contains/index';
 import {
   BadGatewayException,
   BadRequestException,
@@ -13,9 +12,12 @@ import * as _ from 'lodash';
 import { FindManyOptions, In, Repository } from 'typeorm';
 import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
-import { CreateCarAttributeDto } from '../models/carAttribute.dto';
+import {
+  CreateCarAttributeDto,
+  CreateCarAttributeTypeDto,
+} from '../models/carAttribute.dto';
 import { CarAttribute } from './../models/carAttribute.entity';
-import { NotFoundError } from 'rxjs';
+import { CarAttributeType } from '../models/carAttributeType.entity';
 
 @Injectable()
 export class CarService {
@@ -25,8 +27,8 @@ export class CarService {
   @InjectRepository(CarAttribute)
   private readonly carAttributeRepository: Repository<CarAttribute>;
 
-  @InjectRepository(BookedRecord)
-  private readonly BookedRecordRepository: Repository<BookedRecord>;
+  @InjectRepository(CarAttributeType)
+  private readonly carAttributeTypeRepository: Repository<CarAttributeType>;
 
   public getCar(id: string): Promise<Car> {
     return this.carRepository.findOneBy({ id: id });
@@ -51,7 +53,10 @@ export class CarService {
       attributes: listAttributes,
       images: uploadResult,
     });
-    return this.carRepository.save(car);
+
+    await this.carRepository.save(car);
+
+    return car;
   }
 
   public async getAllCar(
@@ -63,29 +68,16 @@ export class CarService {
       endDate: '',
     },
   ): Promise<Car[]> {
-    const attributeFromQuery = Object.keys(CarAttributeType)
-      .map((item) => ({
-        type: CarAttributeType[item],
-        value: filter[CarAttributeType[item]],
-      }))
-      .filter((item) => item.value != undefined);
-
-    const attributeType = attributeFromQuery.map((item) => item.type);
+    if (typeof filter?.attribute == 'string') {
+      filter.attribute = [filter.attribute];
+    }
 
     const queryForAttribute =
-      attributeType.length > 0
-        ? attributeType
-            .map(
-              (type) =>
-                `car_attribute.type = '${type}' and car_attribute.value = :${type}`,
-            )
-            .join(' or ')
+      filter.attribute?.length > 0
+        ? filter.attribute
+            .map((id) => `car_attribute.id = '${id}'`)
+            .join(' and ')
         : '1 = 1';
-
-    const paramsForAttribute =
-      attributeType.length > 0
-        ? Object.fromEntries(attributeType.map((key) => [key, filter[key]]))
-        : {};
 
     //TODO: check startDate & endDate here
     const data = await this.carRepository
@@ -93,7 +85,8 @@ export class CarService {
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .orderBy('car.createdAt', 'DESC')
       .leftJoinAndSelect('car.attributes', 'car_attribute')
-      .andWhere(queryForAttribute, paramsForAttribute)
+      .leftJoinAndSelect('car_attribute.type', 'type')
+      .andWhere(queryForAttribute)
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))
       .getMany();
@@ -152,6 +145,7 @@ export class CarService {
       where: {
         id: In(listReducedDuplicateIds),
       },
+      relations: ['type'],
     });
 
     if (result.length != listReducedDuplicateIds.length)
@@ -160,26 +154,51 @@ export class CarService {
     return result;
   }
 
+  public async createAttributeType(typeDetail: CreateCarAttributeTypeDto) {
+    const attribute = await this.carAttributeTypeRepository.save(typeDetail);
+
+    return attribute;
+  }
+
   public async createAttribute(attributeDetail: CreateCarAttributeDto) {
-    const result = await this.carAttributeRepository.save(attributeDetail);
+    const { type, ...data } = attributeDetail;
+    const typeData = await this.getAttributeType(type);
+
+    const attribute = await this.carAttributeRepository.create({
+      ...data,
+    });
+
+    attribute.type = typeData;
+
+    const result = await this.carAttributeRepository.save(attribute);
 
     return result;
   }
 
-  public async getAttribute(type?: CarAttributeType) {
+  public async getAttribute() {
     const filter: FindManyOptions<CarAttribute> = {};
 
-    if (type) filter.where = { type: type };
-
-    const result = await this.carAttributeRepository.find(filter);
+    const result = await this.carAttributeRepository
+      .createQueryBuilder('attribute')
+      .leftJoinAndSelect('attribute.type', 'type')
+      .getMany();
 
     return result;
   }
 
-  public getAllAttributeType(): any[] {
-    return Object.keys(CarAttributeType).map((item) => ({
-      type: CarAttributeType[item],
-      name: CarAttributeType[item],
-    }));
+  public async getAllAttributeType(): Promise<CarAttributeType[]> {
+    const type = await this.carAttributeTypeRepository.find();
+
+    return type;
+  }
+
+  public async getAttributeType(typeId: string): Promise<CarAttributeType> {
+    const type = await this.carAttributeTypeRepository.findOne({
+      where: { id: typeId },
+    });
+
+    if (!type) throw new NotFoundException('Type not found');
+
+    return type;
   }
 }

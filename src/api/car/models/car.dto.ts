@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDateString,
   IsIn,
   IsInt,
@@ -79,15 +80,7 @@ export class CarFilterDto {
   @IsOptional()
   endDate?: string;
 
-  @IsString()
+  @IsString({ each: true })
   @IsOptional()
-  brand?: string;
-
-  @IsString()
-  @IsOptional()
-  type?: string;
-
-  @IsString()
-  @IsOptional()
-  size?: string;
+  attribute?: string[];
 }

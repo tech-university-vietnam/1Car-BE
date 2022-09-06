@@ -3,30 +3,19 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { CarAttributeType } from './carAttributeType.entity';
 
 @Entity()
-export class CarAttribute {
+export class CarAttributeType {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
   public id!: string;
 
-  @ApiProperty()
-  @ManyToOne(() => CarAttributeType, (attribute) => attribute.type)
-  public type: CarAttributeType;
-
   @Column({ type: 'text' })
-  @ApiProperty({ default: 'Audi' })
-  public value: string;
-
-  @Column({ type: 'boolean', default: false })
-  @ApiProperty({ default: false })
-  public isDeleted: boolean;
+  @ApiProperty()
+  public type: string;
 
   /*
    * Create and Update Date Columns
@@ -39,5 +28,4 @@ export class CarAttribute {
   @UpdateDateColumn({ type: 'timestamp' })
   @ApiProperty()
   public updatedAt!: Date;
-  attribute: Promise<CarAttributeType>;
 }

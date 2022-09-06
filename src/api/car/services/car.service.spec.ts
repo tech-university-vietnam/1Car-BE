@@ -7,14 +7,15 @@ import axios from 'axios';
 import * as fs from 'fs';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import * as path from 'path';
-import { DataSource, QueryFailedError } from 'typeorm';
-import { CarAttributeType, CarStatus } from '../../../contains';
+import { DataSource } from 'typeorm';
+import { CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
 import { CarController } from '../controllers/car.controller';
 import { CarFilterDto } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
+import { CarAttributeType } from '../models/carAttributeType.entity';
 import { CarService } from './car.service';
 
 jest.mock('axios');
@@ -43,7 +44,7 @@ describe('CarService', () => {
         }),
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
-        TypeOrmModule.forFeature([BookedRecord]),
+        TypeOrmModule.forFeature([CarAttributeType]),
       ],
       providers: [CarService],
     }).compile();
@@ -53,10 +54,11 @@ describe('CarService', () => {
 
     await testUtils.cleanAll([
       'car_attributes_car_attribute',
+      'car_attribute_type',
       'car',
       'car_attribute',
     ]);
-    await testUtils.loadAll(['car_attribute', 'car']);
+    await testUtils.loadAll(['car_attribute_type', 'car_attribute', 'car']);
   });
 
   afterEach(async () => {
@@ -219,7 +221,7 @@ describe('CarService', () => {
       numberOfTrips: 10,
       numberOfKilometer: 10,
       locationId: 'string',
-      attributes: ['3926cd59-cd4b-4bbc-821d-21800019780f'],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
     };
 
     const images = [file];
@@ -231,7 +233,7 @@ describe('CarService', () => {
 
   it('should create an attribute and return attribute detail', async () => {
     const testAttribute: CreateCarAttributeDto = {
-      type: CarAttributeType.BRAND,
+      type: '869562b6-a012-4b55-becb-efbabd804de9',
       value: 'Ferrari',
     };
 
@@ -240,27 +242,13 @@ describe('CarService', () => {
     expect(attribute.value).toBe('Ferrari');
   });
 
-  it('should return a list of car attribute', async () => {
-    // 5 brand attribute that have inserted to DB
-    const listAttributeBrand = await carService.getAttribute(
-      CarAttributeType.BRAND,
-    );
-    expect(listAttributeBrand).toHaveLength(5);
-
-    // 10 attribute that have inserted to DB
-    const allAttributes = await carService.getAttribute();
-    expect(allAttributes).toHaveLength(10);
-  });
-
   it('should return list attribute from list ID', async () => {
     // 3 attribute that have inserted to DB & reduce the duplicate ids
     const listAttribute = await carService.getAttributesFromIds([
-      'd43eceb9-36fd-4500-ac46-68cc3ea433da',
-      '869562b6-a012-4b55-becb-efbabd804de9',
       '477004fa-bcb1-4abd-83ee-c99175532c17',
       '477004fa-bcb1-4abd-83ee-c99175532c17',
     ]);
-    expect(listAttribute).toHaveLength(3);
+    expect(listAttribute).toHaveLength(1);
   });
 
   it('should throw error if attribute not found', async () => {
@@ -278,19 +266,15 @@ describe('CarService', () => {
   });
 
   it('should return list of current attribute types', async () => {
-    const attributeList = carService.getAllAttributeType();
-    expect(attributeList).toHaveLength(3);
-    expect(attributeList[0]).toEqual({ type: 'brand', name: 'brand' });
+    const attributeList = await carService.getAllAttributeType();
+    expect(attributeList).toHaveLength(5);
   });
 
   it('should return list of 1 car with status Available by default', async () => {
     const unavailableCar = {
       name: 'New Car 2',
       description: 'New Car',
-      attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
-        '3926cd59-cd4b-4bbc-821d-21800019780f',
-      ],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
       numberOfTrips: 0,
       numberOfKilometer: 0,
       locationId: '',
@@ -313,10 +297,7 @@ describe('CarService', () => {
     const availableCar = {
       name: 'New Car 2',
       description: 'New Car',
-      attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
-        '3926cd59-cd4b-4bbc-821d-21800019780f',
-      ],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
       numberOfTrips: 0,
       numberOfKilometer: 0,
       locationId: '',
@@ -339,10 +320,7 @@ describe('CarService', () => {
     const availableCar = {
       name: 'New Car 2',
       description: 'New Car',
-      attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
-        '3926cd59-cd4b-4bbc-821d-21800019780f',
-      ],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
       numberOfTrips: 0,
       numberOfKilometer: 0,
       locationId: '',
@@ -361,14 +339,11 @@ describe('CarService', () => {
     expect(cars[0].name).toBe('New Car 1');
   });
 
-  it('should return list of 1 car with brand = "350Z"', async () => {
+  it('should return list of 1 car with attribute = ["3926cd59-cd4b-4bbc-821d-21800019780f"],  ', async () => {
     const availableCar = {
       name: 'New Car 2',
       description: 'New Car',
-      attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
-        '3926cd59-cd4b-4bbc-821d-21800019780f',
-      ],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
       numberOfTrips: 0,
       numberOfKilometer: 0,
       locationId: '',
@@ -378,22 +353,19 @@ describe('CarService', () => {
 
     await carService.createCar(availableCar, []);
 
-    const filter = { brand: '350Z' };
+    const filter = { attribute: ['477004fa-bcb1-4abd-83ee-c99175532c17'] };
     const cars = await carService.getAllCar(filter);
 
     expect(cars).toHaveLength(1);
-    cars.forEach((item) => expect(item.attributes[0].type).toBe('brand'));
-    cars.forEach((item) => expect(item.attributes[0].value).toBe('350Z'));
+    cars.forEach((item) => expect(item.attributes[0].type.type).toBe('type'));
+    cars.forEach((item) => expect(item.attributes[0].value).toBe('S-Class'));
   });
 
-  it('should return empty with brand = "350Z-fake"', async () => {
+  it('should return empty with wrong attribute id', async () => {
     const availableCar = {
       name: 'New Car 2',
       description: 'New Car',
-      attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
-        '3926cd59-cd4b-4bbc-821d-21800019780f',
-      ],
+      attributes: ['477004fa-bcb1-4abd-83ee-c99175532c17'],
       numberOfTrips: 0,
       numberOfKilometer: 0,
       locationId: '',
@@ -403,7 +375,7 @@ describe('CarService', () => {
 
     await carService.createCar(availableCar, []);
 
-    const filter = { brand: '350Z-fake' };
+    const filter = { attribute: ['3926cd59-cd4b-4bbc-821d-21800019780c'] };
     const cars = await carService.getAllCar(filter);
 
     expect(cars).toHaveLength(0);

@@ -21,7 +21,10 @@ import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
 import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
-import { CreateCarAttributeDto } from '../models/carAttribute.dto';
+import {
+  CreateCarAttributeDto,
+  CreateCarAttributeTypeDto,
+} from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarService } from '../services/car.service';
 
@@ -31,9 +34,33 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
-  @Get()
-  public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
-    return this.service.getAllCar(filter);
+  @Get('/attribute/type')
+  @ApiResponse({ type: Array<{ type: string; name: string }> })
+  getAttributeType() {
+    return this.service.getAllAttributeType();
+  }
+
+  @Get('/attribute')
+  getAttribute() {
+    return this.service.getAttribute();
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.service.uploadImage(file.buffer);
+  }
+
+  @Post('/attribute/type')
+  @ApiCreatedResponse({ type: CarAttribute })
+  createAttributeType(@Body() data: CreateCarAttributeTypeDto) {
+    return this.service.createAttributeType(data);
+  }
+
+  @Post('/attribute')
+  @ApiCreatedResponse({ type: CarAttribute })
+  createAttribute(@Body() data: CreateCarAttributeDto) {
+    return this.service.createAttribute(data);
   }
 
   @Post()
@@ -49,29 +76,6 @@ export class CarController {
       files.map((item) => item.buffer),
     );
     return createdCar;
-  }
-
-  @Get('/attribute')
-  getAttribute(@Query('type') type?: CarAttributeType) {
-    return this.service.getAttribute(type);
-  }
-
-  @Post('/attribute')
-  @ApiCreatedResponse({ type: CarAttribute })
-  createAttribute(@Body() data: CreateCarAttributeDto) {
-    return this.service.createAttribute(data);
-  }
-
-  @Get('/attribute/type')
-  @ApiResponse({ type: Array<{ type: string; name: string }> })
-  getAttributeType() {
-    return this.service.getAllAttributeType();
-  }
-
-  @Post('/upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.service.uploadImage(file.buffer);
   }
 
   @Get(':id')
