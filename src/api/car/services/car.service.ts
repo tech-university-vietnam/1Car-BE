@@ -94,6 +94,27 @@ export class CarService {
     return data;
   }
 
+  public async getCarAttributes(id: string) {
+    const data = await this.carRepository
+      .createQueryBuilder('car')
+      .where('car.id = :id', { id })
+      .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .getOne();
+
+    if (!data) {
+      throw new NotFoundException('Car not found');
+    }
+
+    return data.attributes.reduce((accum, attribute) => {
+      accum[attribute.type] = attribute.value;
+      return accum;
+    }, {});
+  }
+
+  public async checkCarAvailability(startDate, endDate) {
+    return false;
+  }
+
   public async uploadImage(file: Buffer) {
     try {
       const form = new FormData();
