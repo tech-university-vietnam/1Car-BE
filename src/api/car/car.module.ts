@@ -4,6 +4,7 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { CarController } from './controllers/car.controller';
 import { Car } from './models/car.entity';
 import { CarAttribute } from './models/carAttribute.entity';
+import { CarAttributeType } from './models/carAttributeType.entity';
 import { CarService } from './services/car.service';
 
 @Module({
@@ -11,6 +12,7 @@ import { CarService } from './services/car.service';
     NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([CarAttribute]),
+    TypeOrmModule.forFeature([CarAttributeType]),
   ],
   exports: [
     CarService,

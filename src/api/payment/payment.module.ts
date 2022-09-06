@@ -8,6 +8,7 @@ import { CarModule } from '../car/car.module';
 import { CarController } from '../car/controllers/car.controller';
 import { Car } from '../car/models/car.entity';
 import { CarAttribute } from '../car/models/carAttribute.entity';
+import { CarAttributeType } from '../car/models/carAttributeType.entity';
 import { User } from '../user/models/user.entity';
 import { UserModule } from '../user/user.module';
 import { PaymentController } from './controllers/payment.controller';
@@ -25,6 +26,7 @@ import { StripeService } from './services/stripe.service';
     TypeOrmModule.forFeature([Booking]),
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([CarAttribute]),
+    TypeOrmModule.forFeature([CarAttributeType]),
   ],
   controllers: [PaymentController, CarController],
   providers: [PaymentService, BookingService, StripeService],
