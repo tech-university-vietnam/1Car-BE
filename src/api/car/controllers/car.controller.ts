@@ -79,4 +79,10 @@ export class CarController {
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
   }
+  @Get(':id/attributes')
+  public getCarAttributes(
+    @Param('id') id: string,
+  ): Promise<Record<string, unknown>> {
+    return this.service.getCarAttributes(id);
+  }
 }

@@ -90,6 +90,7 @@ describe('CarService', () => {
     expect(attributes).toEqual(
       expect.objectContaining({ brand: '350Z', type: 'S-Class' }),
     );
+    console.log(attributes);
   });
 
   it('should throw expection if car not found', async () => {
