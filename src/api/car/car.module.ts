@@ -1,3 +1,4 @@
+import { BookedRecord } from './../booking/models/bookedRecord.entity';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
@@ -11,6 +12,7 @@ import { CarService } from './services/car.service';
     NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([CarAttribute]),
+    TypeOrmModule.forFeature([BookedRecord]),
   ],
   exports: [
     CarService,

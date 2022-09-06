@@ -1,3 +1,4 @@
+import { BookedRecord } from './../../booking/models/bookedRecord.entity';
 import { CarAttributeType, CarStatus } from './../../../contains/index';
 import {
   BadGatewayException,
@@ -23,6 +24,9 @@ export class CarService {
 
   @InjectRepository(CarAttribute)
   private readonly carAttributeRepository: Repository<CarAttribute>;
+
+  @InjectRepository(BookedRecord)
+  private readonly BookedRecordRepository: Repository<BookedRecord>;
 
   public getCar(id: string): Promise<Car> {
     return this.carRepository.findOneBy({ id: id });
@@ -112,6 +116,14 @@ export class CarService {
       accum[attribute.type] = attribute.value;
       return accum;
     }, {});
+  }
+
+  public async checkCarAvailability(startDate, endDate) {
+    // const data = this.BookedRecordRepository.createQueryBuilder('booked_record')
+    //   .where('booked_record.bookedDate = :startDate', { startDate })
+    //   .getOne();
+    // return data;
+    return null;
   }
 
   public async uploadImage(file: Buffer) {

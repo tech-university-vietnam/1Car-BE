@@ -1,3 +1,4 @@
+import { BookedRecord } from './models/bookedRecord.entity';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -17,6 +18,7 @@ import { BookingService } from './services/booking.service';
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([CarAttribute]),
+    TypeOrmModule.forFeature([BookedRecord]),
   ],
   exports: [BookingService],
   controllers: [BookingController],

@@ -1,8 +1,5 @@
-import {
-  BadGatewayException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BookedRecord } from './../../booking/models/bookedRecord.entity';
+import { BadGatewayException, BadRequestException } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -46,6 +43,7 @@ describe('CarService', () => {
         }),
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
+        TypeOrmModule.forFeature([BookedRecord]),
       ],
       providers: [CarService],
     }).compile();
@@ -409,5 +407,10 @@ describe('CarService', () => {
     const cars = await carService.getAllCar(filter);
 
     expect(cars).toHaveLength(0);
+  });
+
+  it('getCarAvailability', async () => {
+    const data = await carService.checkCarAvailability('1/1/2000', '10/1/2000');
+    expect(data).toBeNull();
   });
 });
