@@ -16,7 +16,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { filter } from 'lodash';
 import { FormDataRequest } from 'nestjs-form-data';
 import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
@@ -32,27 +31,9 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
-  @Get('/attribute/type')
-  @ApiResponse({ type: Array<{ type: string; name: string }> })
-  getAttributeType() {
-    return this.service.getAllAttributeType();
-  }
-
-  @Get('/attribute')
-  getAttribute(@Query('type') type?: CarAttributeType) {
-    return this.service.getAttribute(type);
-  }
-
-  @Post('/upload')
-  @UseInterceptors(FileInterceptor('file'))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
-    return this.service.uploadImage(file.buffer);
-  }
-
-  @Post('/attribute')
-  @ApiCreatedResponse({ type: CarAttribute })
-  createAttribute(@Body() data: CreateCarAttributeDto) {
-    return this.service.createAttribute(data);
+  @Get()
+  public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
+    return this.service.getAllCar(filter);
   }
 
   @Post()
@@ -70,19 +51,38 @@ export class CarController {
     return createdCar;
   }
 
+  @Get('/attribute')
+  getAttribute(@Query('type') type?: CarAttributeType) {
+    return this.service.getAttribute(type);
+  }
+
+  @Post('/attribute')
+  @ApiCreatedResponse({ type: CarAttribute })
+  createAttribute(@Body() data: CreateCarAttributeDto) {
+    return this.service.createAttribute(data);
+  }
+
+  @Get('/attribute/type')
+  @ApiResponse({ type: Array<{ type: string; name: string }> })
+  getAttributeType() {
+    return this.service.getAllAttributeType();
+  }
+
+  @Post('/upload')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return this.service.uploadImage(file.buffer);
+  }
+
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
 
-  @Get()
-  public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
-    return this.service.getAllCar(filter);
-  }
   @Get(':id/attributes')
-  public getCarAttributes(
-    @Param('id') id: string,
-  ): Promise<Record<string, unknown>> {
+  @ApiResponse({ status: 200, description: 'Attributes returned' })
+  @ApiResponse({ status: 404, description: 'Car not found' })
+  public getCarAttributes(@Param('id') id: string) {
     return this.service.getCarAttributes(id);
   }
 }

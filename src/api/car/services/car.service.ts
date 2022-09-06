@@ -105,7 +105,7 @@ export class CarService {
       .getOne();
 
     if (!data) {
-      throw new NotFoundException('car not found');
+      throw new NotFoundException('Car not found');
     }
 
     return data.attributes.reduce((accum, attribute) => {
