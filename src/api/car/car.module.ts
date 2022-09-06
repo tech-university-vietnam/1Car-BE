@@ -12,6 +12,10 @@ import { CarService } from './services/car.service';
     TypeOrmModule.forFeature([Car]),
     TypeOrmModule.forFeature([CarAttribute]),
   ],
+  exports: [
+    CarService,
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
+  ],
   controllers: [CarController],
   providers: [CarService],
 })
