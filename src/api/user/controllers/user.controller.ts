@@ -7,16 +7,13 @@ import {
   Patch,
   Post,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 import { User } from '../models/user.entity';
 import { UserService } from '../services/user.service';
-import { Public } from '../../../decorators/public.decorator';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
-import { Update } from '../../../decorators/update.decorator';
+import { CreateUser } from '../../../decorators/createUser.decorator';
 
 @Controller('user')
 @ApiTags('user')
@@ -28,13 +25,11 @@ export class UserController {
    * Get user by token in Authorization header
    * @param req: Request which has been override by auth guard
    */
-  @UseGuards(JwtAuthGuard)
   @Get('me')
   public async getUserByAuthorization(@Req() req: Request) {
     return { data: await this.service.getUserByEmail(req.auth.email) };
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post('admin')
   public async createAdmin(@Req() req: Request): Promise<User> {
     if (req.auth?.email) {
@@ -42,7 +37,6 @@ export class UserController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('validate')
   public async validateUser(@Req() req: Request) {
     // Expose API for other service
@@ -57,7 +51,6 @@ export class UserController {
    * @param id: userId store in database
    * @param req: Express express
    */
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   public getUser(@Param('id') id: string, @Req() req: Request): Promise<User> {
     return this.service.getUser(id);
@@ -69,7 +62,7 @@ export class UserController {
    * Create user only by email
    * @param body: {email: string, name: string}
    */
-  @Public()
+  @CreateUser()
   @Post()
   @ApiCreatedResponse({ type: User })
   public async createUser(@Body() body: CreateUserDto): Promise<User> {
@@ -81,8 +74,6 @@ export class UserController {
    * @param body: Request body
    * @param req Express request
    */
-  @Update()
-  @UseGuards(JwtAuthGuard)
   @Patch()
   public async updateUser(
     @Body()

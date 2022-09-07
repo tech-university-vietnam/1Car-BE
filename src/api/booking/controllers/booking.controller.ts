@@ -6,12 +6,10 @@ import {
   Param,
   Post,
   Req,
-  UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Booking } from '../models/booking.entity';
 import { BookingService } from '../services/booking.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
 import { CreateBookingDTO } from '../models/booking.dto';
 
@@ -26,7 +24,6 @@ export class BookingController {
     return this.service.getBooking(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: Booking })
   public async createBooking(

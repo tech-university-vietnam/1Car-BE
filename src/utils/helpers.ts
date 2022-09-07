@@ -24,3 +24,7 @@ export const getTokenFromAuthorizationString = (
 export const getUserNameFromEmail = (email: string): string => {
   return email.split('@')[0];
 };
+
+export const isTokenExpired = (time: number): boolean => {
+  return new Date(time * 1000).getTime() < new Date().getTime();
+};
