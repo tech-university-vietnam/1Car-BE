@@ -1,6 +1,5 @@
 import {
   ExecutionContext,
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -42,19 +41,22 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
     const err = null;
     if (!token) {
       return {
-        err: new ForbiddenException(),
+        err: new UnauthorizedException(),
         user,
       };
     }
 
     const request: Request = ctx.switchToHttp().getRequest();
 
+    // Check if there is a token that can be decoded
     const decodedToken = this.authService.decodeTokenToObject(token);
     if (!decodedToken)
       return {
         err: new UnauthorizedException(),
         user,
       };
+
+    // Check if token is expired or not
     if (decodedToken['exp'] && isTokenExpired(decodedToken['exp'])) {
       return {
         err: new HttpException(
@@ -64,6 +66,8 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
         user,
       };
     }
+
+    // Check if it is a valid user
     const email = this.authService.fromTokenGetEmail(decodedToken);
     user = await this.userService.getUserByEmail(email);
     if (user) {
