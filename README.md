@@ -49,3 +49,22 @@ $ npm run test:e2e
 # test coverage
 $ npm run test:cov
 ```
+
+# Integrate with Auth0
+
+I config ultrahook to work with Auth0 post registration hook.
+When sign up using Auth0 universal login successfully, it will send info to the below endpoint.
+
+The api key: HPVB6Nap29id7WFMSagiLYCekexfKEcQ
+
+The post registration will hit https://ninahuynh-auth0.ultrahook.com.
+This will proxy to http://localhost:8080, our backend app.
+
+## Get started with ultrahook
+
+Save the Api key:
+```echo "api_key: HPVB6Nap29id7WFMSagiLYCekexfKEcQ" > ~/.ultrahook```
+
+And install the UltraHook client:
+```gem install ultrahook```
+
