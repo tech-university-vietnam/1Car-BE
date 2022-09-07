@@ -6,6 +6,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -13,19 +14,19 @@ import {
 @Entity()
 export class BookedRecord {
   @PrimaryGeneratedColumn('uuid')
+  @ApiProperty()
   public id!: string;
 
-  @Column({ type: 'boolean', default: false })
-  public isDeleted: boolean;
-
-  @Column('timestamp')
   @ApiProperty()
-  public bookedDate: Date;
+  @ManyToOne(() => Car, (car) => car.bookTime, { onDelete: 'CASCADE' })
+  public car: Car;
 
-  @ManyToMany(() => Car, { onDelete: 'CASCADE' })
-  @JoinTable()
-  @ApiProperty({ nullable: false })
-  public bookedCars: Car[];
+  @Column({ type: 'tstzrange' })
+  public bookTime: string;
+
+  @Column({ type: 'boolean', default: false })
+  @ApiProperty({ default: false })
+  public isDeleted: boolean;
   /*
    * Create and Update Date Columns
    */

@@ -11,19 +11,24 @@ import { Request } from 'express';
 import Stripe from 'stripe';
 import { DataSource, Repository } from 'typeorm';
 import utils from '../../../utils/utils';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 import { Booking, bookingStatus } from '../../booking/models/booking.entity';
 import { BookingService } from '../../booking/services/booking.service';
+import { Car } from '../../car/models/car.entity';
 import { CarService } from '../../car/services/car.service';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { Payment } from '../models/payment.entity';
 import { StripeService } from './stripe.service';
 @Injectable()
 export class PaymentService {
-  @InjectRepository(Payment)
-  private readonly paymentRepository: Repository<Payment>;
-
   @InjectRepository(Booking)
   private readonly bookingRepository: Repository<Booking>;
+
+  @InjectRepository(BookedRecord)
+  private readonly bookredRecordRepository: Repository<BookedRecord>;
+
+  @InjectRepository(Car)
+  private readonly carRepository: Repository<Car>;
 
   @Inject(BookingService)
   private readonly bookingService: BookingService;
@@ -48,11 +53,10 @@ export class PaymentService {
     const booking = await this.bookingService.createBooking(body, request);
     const car = await this.carService.getCar(body.carId);
     return await this.stripeService.createCheckoutSession(
-      booking.totalPrice,
+      booking,
       `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
       `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
       car.name,
-      booking.id,
     );
   }
 
@@ -79,6 +83,8 @@ export class PaymentService {
             ? intentEvent.charges.data[0].id
             : null;
           const bookingId = intentEvent.metadata.bookingId;
+          const receivedDate = intentEvent.metadata.receivedDate;
+          const returnDate = intentEvent.metadata.returnDate;
           // Update booking status
           await manager.update(
             Booking,
@@ -87,12 +93,21 @@ export class PaymentService {
               bookingStatus: bookingStatus.SUCCESS,
             },
           );
+          // Update bookedRecord
+          const booking = await this.bookingService.getBooking(bookingId);
+          if (!booking) throw new BadRequestException('Booking not found');
+          const car = await this.carRepository.findOne({
+            where: { id: booking.carId },
+          });
+          await this.bookredRecordRepository.save({
+            car: car,
+            bookTime: `[${receivedDate}, ${returnDate})`,
+          });
           // Create new payment with booking ID
           const newPayment = new Payment();
           newPayment.amount = intentEvent.amount;
           newPayment.bookingId = bookingId;
           newPayment.stripePaymentId = stripePaymentId;
-
           await manager.save(newPayment);
         });
 
