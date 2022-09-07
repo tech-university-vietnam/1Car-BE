@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
+import { Booking } from '../../booking/models/booking.entity';
 
 @Injectable()
 export class StripeService {
@@ -16,11 +17,10 @@ export class StripeService {
   }
 
   public createCheckoutSession = async (
-    amount: number,
+    booking: Booking,
     successUrl: string,
     cancelUrl: string,
     carName: string,
-    bookingId: string,
   ) =>
     await this.stripe.checkout.sessions.create({
       line_items: [
@@ -30,14 +30,16 @@ export class StripeService {
             product_data: {
               name: carName,
             },
-            unit_amount: amount * 100,
+            unit_amount: booking.totalPrice * 100,
           },
           quantity: 1,
         },
       ],
       payment_intent_data: {
         metadata: {
-          bookingId: bookingId,
+          bookingId: booking.id,
+          receivedDate: booking.receivedDateTime.toISOString(),
+          returnDate: booking.returnDateTime.toISOString(),
         },
       },
       mode: 'payment',

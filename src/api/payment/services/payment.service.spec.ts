@@ -20,6 +20,7 @@ import { AuthModule } from '../../auth/auth.module';
 import { UserModule } from '../../user/user.module';
 import { CarModule } from '../../car/car.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 
 describe('PaymentService', () => {
   let moduleRef: TestingModule;
@@ -56,6 +57,7 @@ describe('PaymentService', () => {
         TypeOrmModule.forFeature([Payment]),
         TypeOrmModule.forFeature([User]),
         TypeOrmModule.forFeature([Booking]),
+        TypeOrmModule.forFeature([BookedRecord]),
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
       ],

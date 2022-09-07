@@ -79,13 +79,19 @@ export class CarService {
             .join(' and ')
         : '1 = 1';
 
-    //TODO: check startDate & endDate here
+    const queryForRangeDate =
+      filter.startDate && filter.endDate
+        ? `NOT booked_record.bookTime && :date`
+        : `1 = 1`;
+    const bookingRange = `[${filter.startDate}, ${filter.endDate})`;
     const data = await this.carRepository
       .createQueryBuilder('car')
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .orderBy('car.createdAt', 'DESC')
       .leftJoinAndSelect('car.attributes', 'car_attribute')
       .leftJoinAndSelect('car_attribute.type', 'type')
+      .leftJoinAndSelect('car.bookTime', 'booked_record')
+      .andWhere(queryForRangeDate, { date: bookingRange })
       .andWhere(queryForAttribute)
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))
