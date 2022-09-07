@@ -16,6 +16,7 @@ import { UserService } from '../services/user.service';
 import { Public } from '../../../decorators/public.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
+import { Update } from '../../../decorators/update.decorator';
 
 @Controller('user')
 @ApiTags('user')
@@ -80,6 +81,7 @@ export class UserController {
    * @param body: Request body
    * @param req Express request
    */
+  @Update()
   @UseGuards(JwtAuthGuard)
   @Patch()
   public async updateUser(

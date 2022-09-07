@@ -18,6 +18,7 @@ import {
 import { ExceptionMessage } from '../constants';
 import { AuthService } from '../services/auth.service';
 import { CreateUserDto } from '../../user/models/user.dto';
+import { IS_UPDATE_KEY } from '../../../decorators/update.decorator';
 
 // Return unauthorized in case that is truly unauthorized,
 // Return Bad Request if there is missing info
@@ -33,6 +34,11 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+      ctx.getHandler(),
+      ctx.getClass(),
+    ]);
+
+    const isUpdate = this.reflector.getAllAndOverride<boolean>(IS_UPDATE_KEY, [
       ctx.getHandler(),
       ctx.getClass(),
     ]);
@@ -59,20 +65,20 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
             email,
             userId: user.id,
           };
-        } else {
           const isMissingInfo = checkUserHaveEnoughInfo(user);
-          if (isMissingInfo) {
-            err = new HttpException(
-              ExceptionMessage.USER_NEED_UPDATE_INFO,
-              HttpStatus.BAD_REQUEST,
-            );
-          } else {
-            await this.userService.createUser(new CreateUserDto(email, email));
+          // If it is not from the update endpoint and user is missing data
+          if (!isUpdate && !isMissingInfo) {
             err = new HttpException(
               ExceptionMessage.USER_NEED_UPDATE_INFO,
               HttpStatus.BAD_REQUEST,
             );
           }
+        } else {
+          await this.userService.createUser(new CreateUserDto(email, email));
+          err = new HttpException(
+            ExceptionMessage.USER_NEED_UPDATE_INFO,
+            HttpStatus.BAD_REQUEST,
+          );
         }
 
         if (
