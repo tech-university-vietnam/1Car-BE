@@ -38,6 +38,9 @@ export class CarService {
     carDetail: Omit<CreateCarDTO, 'images'>,
     images: Buffer[],
   ): Promise<Car> {
+    if (typeof carDetail.attributes == 'string')
+      carDetail.attributes = [carDetail.attributes];
+
     const listAttributes = await this.getAttributesFromIds(
       carDetail.attributes,
     );
