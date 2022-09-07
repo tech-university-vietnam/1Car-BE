@@ -82,11 +82,12 @@ export class CarController {
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
-
   @Get(':id/attributes')
-  @ApiResponse({ status: 200, description: 'Attributes returned' })
-  @ApiResponse({ status: 404, description: 'Car not found' })
   public getCarAttributes(@Param('id') id: string) {
     return this.service.getCarAttributes(id);
+  }
+  @Get()
+  public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
+    return this.service.getAllCar(filter);
   }
 }

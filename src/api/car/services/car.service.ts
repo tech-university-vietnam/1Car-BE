@@ -99,6 +99,7 @@ export class CarService {
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
       .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .leftJoinAndSelect('car_attribute.type', 'type')
       .getOne();
 
     if (!data) {
@@ -106,7 +107,7 @@ export class CarService {
     }
 
     return data.attributes.reduce((accum, attribute) => {
-      accum[attribute.type] = attribute.value;
+      accum[attribute.type.type] = attribute.value;
       return accum;
     }, {});
   }
