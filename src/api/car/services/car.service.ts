@@ -105,10 +105,11 @@ export class CarService {
       throw new NotFoundException('Car not found');
     }
 
-    return data.attributes.reduce((accum, attribute) => {
-      accum[attribute.type] = attribute.value;
-      return accum;
-    }, {});
+    // return data.attributes.reduce((accum, attribute) => {
+    //   accum[attribute.type] = attribute.value;
+    //   return accum;
+    // }, {});
+    return null;
   }
 
   public async checkCarAvailability(startDate, endDate) {
