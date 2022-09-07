@@ -76,31 +76,45 @@ export class CarService {
     }
 
     const queryForAttribute =
-      filter.attribute?.length > 0
-        ? filter.attribute
-            .map((id) => `car_attribute.id = '${id}'`)
-            .join(' and ')
-        : '1 = 1';
+      filter.attribute?.length > 0 ? `car_attribute.id IN(:...ids)` : '1 = 1';
+
+    const queryForHaving =
+      filter.attribute?.length > 0 ? `count(*) = :countAttributes` : '1 = 1';
 
     const queryForRangeDate =
       filter.startDate && filter.endDate
         ? `NOT booked_record.bookTime && :date`
         : `1 = 1`;
     const bookingRange = `[${filter.startDate}, ${filter.endDate})`;
+
     const data = await this.carRepository
       .createQueryBuilder('car')
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
-      .orderBy('car.createdAt', 'DESC')
-      .leftJoinAndSelect('car.attributes', 'car_attribute')
-      .leftJoinAndSelect('car_attribute.type', 'type')
-      .leftJoinAndSelect('car.bookTime', 'booked_record')
+      .leftJoin('car.attributes', 'car_attribute')
+      .andWhere(queryForAttribute, { ids: filter.attribute })
+      .leftJoin('car.bookTime', 'booked_record')
       .andWhere(queryForRangeDate, { date: bookingRange })
-      .andWhere(queryForAttribute)
+      .groupBy('car.id')
+      .having(queryForHaving, {
+        countAttributes: filter.attribute?.length,
+      })
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))
       .getMany();
 
-    return data;
+    const result =
+      data.length > 0
+        ? await this.carRepository
+            .createQueryBuilder('car')
+            .orderBy('car.createdAt', 'DESC')
+            .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+            .leftJoinAndSelect('car.attributes', 'car_attribute')
+            .leftJoinAndSelect('car_attribute.type', 'type')
+            .leftJoinAndSelect('car.bookTime', 'booked_record')
+            .getMany()
+        : [];
+
+    return result;
   }
 
   public async getCarAttributes(id: string) {
