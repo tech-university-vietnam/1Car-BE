@@ -63,7 +63,9 @@
             "invoice": null,
             "livemode": false,
             "metadata": {
-              "bookingId": "36e6745a-7d6f-4ccb-b809-58856b0fd269"
+              "bookingId": "36e6745a-7d6f-4ccb-b809-58856b0fd269",
+              "receivedDate": "2014-01-20 20:00:00.000",
+              "returnDate": "2014-01-28 21:00:00.000"
             },
             "on_behalf_of": null,
             "order": null,
@@ -137,7 +139,9 @@
       "last_payment_error": null,
       "livemode": false,
       "metadata": {
-        "bookingId": "36e6745a-7d6f-4ccb-b809-58856b0fd269"
+        "bookingId": "36e6745a-7d6f-4ccb-b809-58856b0fd269",
+        "receivedDate": "2014-01-20 20:00:00.000",
+                "returnDate": "2014-01-28 21:00:00.000"
       },
       "next_action": null,
       "on_behalf_of": null,

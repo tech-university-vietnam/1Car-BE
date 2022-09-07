@@ -95,7 +95,7 @@ export class CarService {
       .leftJoinAndSelect('car.attributes', 'car_attribute')
       .leftJoinAndSelect('car_attribute.type', 'type')
       .leftJoinAndSelect('car.bookTime', 'booked_record')
-      .where(queryForRangeDate, { date: bookingRange })
+      .andWhere(queryForRangeDate, { date: bookingRange })
       .andWhere(queryForAttribute)
       .take(filter.limit || 10)
       .skip((filter.limit || 10) * ((filter.page || 1) - 1))

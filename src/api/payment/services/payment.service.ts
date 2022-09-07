@@ -25,7 +25,7 @@ export class PaymentService {
   private readonly bookingRepository: Repository<Booking>;
 
   @InjectRepository(BookedRecord)
-  private readonly bookredRecordRepository: Repository<BookedRecord>;
+  private readonly bookedRecordRepository: Repository<BookedRecord>;
 
   @InjectRepository(Car)
   private readonly carRepository: Repository<Car>;
@@ -99,7 +99,7 @@ export class PaymentService {
           const car = await this.carRepository.findOne({
             where: { id: booking.carId },
           });
-          await this.bookredRecordRepository.save({
+          await this.bookedRecordRepository.save({
             car: car,
             bookTime: `[${receivedDate}, ${returnDate})`,
           });
