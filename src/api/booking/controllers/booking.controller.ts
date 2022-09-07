@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -14,6 +15,7 @@ import { BookingService } from '../services/booking.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
 import { CreateBookingDTO } from '../models/booking.dto';
+import { UpdateBookingDTO } from '../models/updateBookingDTO';
 
 @Controller('booking')
 @ApiTags('booking')
@@ -24,6 +26,19 @@ export class BookingController {
   @Get(':id')
   public getBooking(@Param('id') id: string): Promise<Booking> {
     return this.service.getBooking(id);
+  }
+
+  @Get()
+  public getAllBooking(): Promise<Booking[]> {
+    return this.service.getAllBooking();
+  }
+
+  @Patch(':id')
+  public async updateBooking(
+    @Param('id') id: string,
+    @Body() body: UpdateBookingDTO,
+  ) {
+    return this.service.updateBooking(id, body);
   }
 
   @UseGuards(JwtAuthGuard)
