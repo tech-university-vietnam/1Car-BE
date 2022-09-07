@@ -76,8 +76,8 @@ describe('CarService', () => {
       name: 'New Car 2',
       description: 'New Car',
       attributes: [
-        '477004fa-bcb1-4abd-83ee-c99175532c17',
         '3926cd59-cd4b-4bbc-821d-21800019780f',
+        'd97937f7-4407-4de0-8c99-89b0288cd051',
       ],
       numberOfTrips: 0,
       numberOfKilometer: 0,
@@ -89,13 +89,14 @@ describe('CarService', () => {
     const carId = Car.id;
     expect(carId).toEqual(expect.stringMatching(uuid_regex));
     const attributes = await carService.getCarAttributes(carId);
+    console.log(attributes);
     expect(attributes).toEqual(
-      expect.objectContaining({ brand: '350Z', type: 'S-Class' }),
+      expect.objectContaining({ brand: 'Pontiac', type: '350Z' }),
     );
     console.log(attributes);
   });
 
-  it('should throw expection if car not found', async () => {
+  it('should throw exception if car not found', async () => {
     await expect(
       carService.getCarAttributes('477004fa-bcb1-4abd-83ee-c99175532c17'),
     ).rejects.toThrow(NotFoundException);

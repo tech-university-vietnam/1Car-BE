@@ -1,4 +1,3 @@
-import { BookedRecord } from './models/bookedRecord.entity';
 import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
