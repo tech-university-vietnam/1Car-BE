@@ -1,10 +1,12 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from '../models/booking.entity';
 import { Request } from 'express';
 import { CarService } from '../../car/services/car.service';
 import { CreateBookingDTO } from '../models/booking.dto';
+import { UpdateBookingDTO } from '../models/updateBookingDTO';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class BookingService {
@@ -20,6 +22,15 @@ export class BookingService {
 
   public async getBookingsByUserId(userId: string): Promise<Booking[]> {
     return await this.repository.findBy({ userId });
+  }
+
+  public async getAllBooking(): Promise<Booking[]> {
+    return await this.repository.find();
+  }
+
+  public async updateBooking(id: string, body: UpdateBookingDTO) {
+    const post = body as QueryDeepPartialEntity<Booking>;
+    return await this.repository.update(id, post);
   }
 
   public async createBooking(
