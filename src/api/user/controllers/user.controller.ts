@@ -16,12 +16,40 @@ import { UserService } from '../services/user.service';
 import { Public } from '../../../decorators/public.decorator';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
+import { Update } from '../../../decorators/update.decorator';
 
 @Controller('user')
 @ApiTags('user')
 export class UserController {
   @Inject(UserService)
   private readonly service: UserService;
+
+  /**
+   * Get user by token in Authorization header
+   * @param req: Request which has been override by auth guard
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  public async getUserByAuthorization(@Req() req: Request) {
+    return { data: await this.service.getUserByEmail(req.auth.email) };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('admin')
+  public async createAdmin(@Req() req: Request): Promise<User> {
+    if (req.auth?.email) {
+      return await this.service.createAdmin(req.auth.email);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('validate')
+  public async validateUser(@Req() req: Request) {
+    // Expose API for other service
+    return {
+      user: await this.service.getUserByEmail(req.auth.email),
+    };
+  }
 
   // This is a protected api
   /**
@@ -35,21 +63,11 @@ export class UserController {
     return this.service.getUser(id);
   }
 
-  /**
-   * Get user by token in Authorization header
-   * @param req: Request which has been override by auth guard
-   */
-  @UseGuards(JwtAuthGuard)
-  @Get()
-  public async getUserByAuthorization(@Req() req: Request) {
-    return await this.service.getUserByEmail(req.auth.email);
-  }
-
   // This is a public api
   /**
    * Use to integrate with Auth0
    * Create user only by email
-   * @param body: {email: string}
+   * @param body: {email: string, name: string}
    */
   @Public()
   @Post()
@@ -63,17 +81,15 @@ export class UserController {
    * @param body: Request body
    * @param req Express request
    */
+  @Update()
+  @UseGuards(JwtAuthGuard)
   @Patch()
   public async updateUser(
     @Body()
     body: UpdateUserDto,
     @Req() req: Request,
   ): Promise<User> {
+    // From user send body and auth email from token
     return await this.service.updateUser(body, req.auth.email);
-  }
-
-  @Get('is-first-time')
-  public async isUserFirstTime(@Req() req: Request): Promise<boolean> {
-    return await this.service.isUserFirstTime(req.auth.email);
   }
 }

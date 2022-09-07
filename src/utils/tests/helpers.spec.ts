@@ -3,6 +3,7 @@ import {
   checkUserHaveEnoughInfo,
   getAuthorizationFromCtx,
   getTokenFromAuthorizationString,
+  getUserNameFromEmail,
 } from '../helpers';
 import { ExecutionContext } from '@nestjs/common';
 import { createMock } from '@golevelup/ts-jest';
@@ -73,5 +74,16 @@ describe('test get token from string', () => {
 
   it('return null if invalid authorization string', () => {
     expect(getTokenFromAuthorizationString(`invalid ${token}`)).toEqual(null);
+  });
+});
+
+describe('test helper for getting from email', () => {
+  it('return the front part of email if it is email', () => {
+    const email = '1car@mail.com';
+    expect(getUserNameFromEmail(email)).toBe('1car');
+  });
+  it('return name if name is inserted', () => {
+    const name = '1car';
+    expect(getUserNameFromEmail(name)).toBe(name);
   });
 });

@@ -13,8 +13,7 @@ import * as path from 'path';
 import { DataSource } from 'typeorm';
 import { CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
-import { CarController } from '../controllers/car.controller';
-import { CarFilterDto } from '../models/car.dto';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
@@ -48,6 +47,7 @@ describe('CarService', () => {
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
         TypeOrmModule.forFeature([CarAttributeType]),
+        TypeOrmModule.forFeature([BookedRecord]),
       ],
       providers: [CarService],
     }).compile();

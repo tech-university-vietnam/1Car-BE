@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
-import { User } from '../models/user.entity';
+import { User, UserRole } from '../models/user.entity';
+import { getUserNameFromEmail } from '../../../utils/helpers';
 
 @Injectable()
 export class UserService {
@@ -22,6 +23,14 @@ export class UserService {
     user.email = body.email;
     user.name = body.name;
     return this.repository.save(user);
+  }
+
+  public createAdmin(email: string): Promise<User> {
+    const admin: User = new User();
+    admin.email = email;
+    admin.name = getUserNameFromEmail(email);
+    admin.userRole = UserRole.ADMIN;
+    return this.repository.save(admin);
   }
 
   public getUserByEmail(email: string): Promise<User | undefined> {
@@ -52,15 +61,6 @@ export class UserService {
       user.name = body.name;
       user.dateOfBirth = body.dateOfBirth;
       return await this.repository.save(user);
-    }
-  }
-
-  public async isUserFirstTime(email: string): Promise<boolean> {
-    const user = await this.getUserByEmail(email);
-    if (!user) {
-      return true;
-    } else {
-      return false;
     }
   }
 }

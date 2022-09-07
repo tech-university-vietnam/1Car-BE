@@ -6,10 +6,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { CarStatus } from '../../../contains';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 import { CarAttribute } from './carAttribute.entity';
 
 export enum carStatus {
@@ -39,6 +41,9 @@ export class Car {
   @Min(0)
   @ApiProperty({ default: 10000.0 })
   public pricePerDate: number;
+
+  @OneToMany(() => BookedRecord, (bookTime) => bookTime.car)
+  public bookTime: BookedRecord[];
 
   @Column({ type: 'int', default: 0 })
   @Min(0)
