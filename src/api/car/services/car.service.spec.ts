@@ -1,4 +1,8 @@
-import { BadGatewayException, BadRequestException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -63,6 +67,39 @@ describe('CarService', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     await moduleRef.close();
+  });
+
+  it('should return the car id after creating the car, and can get all car attributes from car id', async () => {
+    const uuid_regex =
+      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    const newCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+        'd97937f7-4407-4de0-8c99-89b0288cd051',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+    const Car = await carService.createCar(newCar, []);
+    const carId = Car.id;
+    expect(carId).toEqual(expect.stringMatching(uuid_regex));
+    const attributes = await carService.getCarAttributes(carId);
+    console.log(attributes);
+    expect(attributes).toEqual(
+      expect.objectContaining({ brand: 'Pontiac', type: '350Z' }),
+    );
+    console.log(attributes);
+  });
+
+  it('should throw exception if car not found', async () => {
+    await expect(
+      carService.getCarAttributes('477004fa-bcb1-4abd-83ee-c99175532c17'),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should return an array of cars', async () => {
@@ -346,5 +383,10 @@ describe('CarService', () => {
     const cars = await carService.getAllCar(filter);
 
     expect(cars).toHaveLength(0);
+  });
+
+  it('getCarAvailability', async () => {
+    const data = await carService.checkCarAvailability('1/1/2000', '10/1/2000');
+    expect(data).toBeNull();
   });
 });

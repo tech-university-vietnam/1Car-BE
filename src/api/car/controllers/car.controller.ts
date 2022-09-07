@@ -16,7 +16,6 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { filter } from 'lodash';
 import { FormDataRequest } from 'nestjs-form-data';
 import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
@@ -83,7 +82,10 @@ export class CarController {
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
-
+  @Get(':id/attributes')
+  public getCarAttributes(@Param('id') id: string) {
+    return this.service.getCarAttributes(id);
+  }
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);

@@ -105,21 +105,25 @@ export class CarService {
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
       .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .leftJoinAndSelect('car_attribute.type', 'type')
       .getOne();
 
     if (!data) {
       throw new NotFoundException('Car not found');
     }
 
-    // return data.attributes.reduce((accum, attribute) => {
-    //   accum[attribute.type] = attribute.value;
-    //   return accum;
-    // }, {});
-    return null;
+    return data.attributes.reduce((accum, attribute) => {
+      accum[attribute.type.type] = attribute.value;
+      return accum;
+    }, {});
   }
 
   public async checkCarAvailability(startDate, endDate) {
-    return false;
+    // const data = this.BookedRecordRepository.createQueryBuilder('booked_record')
+    //   .where('booked_record.bookedDate = :startDate', { startDate })
+    //   .getOne();
+    // return data;
+    return null;
   }
 
   public async uploadImage(file: Buffer) {
