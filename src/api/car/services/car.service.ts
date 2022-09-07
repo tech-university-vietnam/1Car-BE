@@ -83,7 +83,6 @@ export class CarService {
       filter.startDate && filter.endDate
         ? `NOT booked_record.bookTime && :date`
         : `1 = 1`;
-    //TODO: check startDate & endDate here
     const bookingRange = `[${filter.startDate}, ${filter.endDate})`;
     const data = await this.carRepository
       .createQueryBuilder('car')
