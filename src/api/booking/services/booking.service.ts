@@ -1,18 +1,29 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Booking } from '../models/booking.entity';
 import { Request } from 'express';
 import { CarService } from '../../car/services/car.service';
 import { CreateBookingDTO } from '../models/booking.dto';
+import { UpdateBookingDTO } from '../models/updateBookingDTO';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { UserService } from '../../../api/user/services/user.service';
+import { User } from '../../../api/user/models/user.entity';
+import { Car } from '../../../api/car/models/car.entity';
+
+interface BookingWithUserDto extends Booking {
+  user: User;
+  car: Car;
+}
 
 @Injectable()
 export class BookingService {
-  @InjectRepository(Booking)
-  private readonly repository: Repository<Booking>;
-
-  @Inject()
-  private readonly carService: CarService;
+  constructor(
+    @InjectRepository(Booking)
+    private readonly repository: Repository<Booking>,
+    private readonly userService: UserService,
+    private readonly carService: CarService,
+  ) {}
 
   public async getBooking(id: string): Promise<Booking> {
     return await this.repository.findOneBy({ id: id });
@@ -20,6 +31,31 @@ export class BookingService {
 
   public async getBookingsByUserId(userId: string): Promise<Booking[]> {
     return await this.repository.findBy({ userId });
+  }
+
+  public async getAllBooking(): Promise<BookingWithUserDto[]> {
+    const bookings = await this.repository.find();
+
+    const result: BookingWithUserDto[] = [];
+    await Promise.all(
+      bookings.map(async (item) => {
+        const user = await this.userService.getUser(item.userId);
+        const car = await this.carService.getCar(item.carId);
+        const itemResult = {
+          ...item,
+          user,
+          car,
+        };
+        result.push(itemResult);
+      }),
+    );
+
+    return result;
+  }
+
+  public async updateBooking(id: string, body: UpdateBookingDTO) {
+    const post = body as QueryDeepPartialEntity<Booking>;
+    return await this.repository.update(id, post);
   }
 
   public async createBooking(

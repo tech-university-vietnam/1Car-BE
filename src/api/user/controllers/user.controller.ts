@@ -56,6 +56,13 @@ export class UserController {
     return this.service.getUser(id);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get()
+  @ApiCreatedResponse({ type: Array<User> })
+  public async getAllUser(): Promise<User[]> {
+    return this.service.getAllUser();
+  }
+
   // This is a public api
   /**
    * Use to integrate with Auth0

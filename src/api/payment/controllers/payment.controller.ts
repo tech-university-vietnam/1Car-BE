@@ -26,7 +26,7 @@ export class PaymentController {
     @Req() req: Request,
   ) {
     const session = await this.service.createCheckoutSession(body, req);
-    return res.redirect(session.url);
+    return res.json(session.url);
   }
 
   @Post('/webhook')
