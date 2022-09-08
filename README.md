@@ -77,9 +77,22 @@ This will proxy to http://localhost:8080, our backend app.
 
 ## Get started with ultrahook
 
-Save the Api key:
-```echo "api_key: HPVB6Nap29id7WFMSagiLYCekexfKEcQ" > ~/.ultrahook```
+Register your link [here](https://www.ultrahook.com/register)
+
+Save the Api key get from ultrahook after create:
+```echo "api_key: apikey" > ~/.ultrahook```
 
 And install the UltraHook client:
 ```gem install ultrahook```
 
+Start by running ```ultrahook auth0 8080/user```
+
+Add your link into hooks code urlArray and save
+it [Auth0 hooks](https://manage.auth0.com/dashboard/us/dev-elws5e13/hooks)
+
+![img.png](public/img.png)
+
+Test and run by using Runner and see if the request is made successfully or not by checking the terminal
+![img.png](public/img2.png)
+
+![img.png](public/img3.png)

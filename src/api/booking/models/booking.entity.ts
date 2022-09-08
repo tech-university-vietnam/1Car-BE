@@ -47,6 +47,9 @@ export class Booking {
   public totalPrice: number;
 
   @Column({ nullable: true })
+  public description: string;
+
+  @Column({ nullable: true })
   @ApiProperty()
   public discountCode!: string;
 
