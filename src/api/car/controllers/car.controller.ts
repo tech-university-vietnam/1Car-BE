@@ -78,14 +78,25 @@ export class CarController {
     return createdCar;
   }
 
+  @Get(':id/available')
+  public getCarAvailability(
+    @Param('id') id: string,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    return this.service.getCarAvailability(id, startDate, endDate);
+  }
+
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
+
   @Get(':id/attributes')
   public getCarAttributes(@Param('id') id: string) {
     return this.service.getCarAttributes(id);
   }
+
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);

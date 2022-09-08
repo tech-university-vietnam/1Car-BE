@@ -45,6 +45,10 @@ export class StripeService {
       mode: 'payment',
       success_url: successUrl,
       cancel_url: cancelUrl,
+      expires_at: Math.floor(Date.now() / 1000) + 1800, // Expires after 30 mins
+      metadata: {
+        bookingId: booking.id,
+      },
     });
 
   public constructEvent(
