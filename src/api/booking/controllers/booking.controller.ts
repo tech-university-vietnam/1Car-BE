@@ -22,6 +22,11 @@ import { UpdateBookingDTO } from '../models/updateBookingDTO';
 export class BookingController {
   @Inject(BookingService)
   private readonly service: BookingService;
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  public getCurrentUserBookings(@Req() req: Request): Promise<Booking[]> {
+    return this.service.getCurrentUserBookings(req.auth.userId);
+  }
 
   @Get(':id')
   public getBooking(@Param('id') id: string): Promise<Booking> {
