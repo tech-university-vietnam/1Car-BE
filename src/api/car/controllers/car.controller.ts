@@ -38,7 +38,6 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
-  @Public()
   @Get('/admin')
   public getAllCarForAdmin(@Query() filter: CarAdminFilterDto): Promise<any> {
     return this.service.getAllCarForAdmin(filter);
@@ -63,14 +62,12 @@ export class CarController {
     return this.service.uploadImage(file.buffer);
   }
 
-  @Public()
   @Post('/attribute/type')
   @ApiCreatedResponse({ type: CarAttribute })
   createAttributeType(@Body() data: CreateCarAttributeTypeDto) {
     return this.service.createAttributeType(data);
   }
 
-  @Public()
   @Post('/attribute')
   @ApiCreatedResponse({ type: CarAttribute })
   createAttribute(@Body() data: CreateCarAttributeDto) {
@@ -92,6 +89,7 @@ export class CarController {
     return createdCar;
   }
 
+  @Public()
   @Get(':id/available')
   public getCarAvailability(
     @Param('id') id: string,
@@ -101,11 +99,13 @@ export class CarController {
     return this.service.getCarAvailability(id, startDate, endDate);
   }
 
+  @Public()
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
 
+  @Public()
   @Get(':id/attributes')
   public getCarAttributes(@Param('id') id: string) {
     return this.service.getCarAttributes(id);

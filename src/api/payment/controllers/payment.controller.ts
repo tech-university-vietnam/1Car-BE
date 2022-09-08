@@ -11,6 +11,7 @@ import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { PaymentService } from '../services/payment.service';
+import { Public } from '../../../decorators/public.decorator';
 
 @Controller('payment')
 @ApiTags('payment')
@@ -29,6 +30,7 @@ export class PaymentController {
     return res.json(session.url);
   }
 
+  @Public()
   @Post('/webhook')
   public async handleIntentWebhook(@Req() request: RawBodyRequest<Request>) {
     return this.service.handleIntentWebhook(request);
