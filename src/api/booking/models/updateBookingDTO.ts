@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import { bookingStatus } from './booking.entity';
 
 export class UpdateBookingDTO {
   @IsString()
@@ -13,9 +14,9 @@ export class UpdateBookingDTO {
   @IsOptional()
   public pickUpLocationId?: string;
 
-  @IsString()
+  @IsEnum(bookingStatus)
   @IsOptional()
-  public bookingStatus?: string;
+  public bookingStatus?: bookingStatus;
 
   @IsString()
   @IsOptional()

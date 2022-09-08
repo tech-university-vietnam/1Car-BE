@@ -54,8 +54,10 @@ export class PaymentService {
     const car = await this.carService.getCar(body.carId);
     return await this.stripeService.createCheckoutSession(
       booking,
-      `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
-      `http://${this.config.get<string>('CLIENT_BASE_URL')}`,
+      `https://${this.config.get<string>('CLIENT_BASE_URL')}/booking/${
+        booking.id
+      }/success`,
+      `https://${this.config.get<string>('CLIENT_BASE_URL')}/booking/failed`,
       car.name,
     );
   }
