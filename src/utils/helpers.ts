@@ -16,3 +16,15 @@ export const getTokenFromAuthorizationString = (
     return authorizationString.substring(7, authorizationString.length);
   } else return null;
 };
+
+/**
+ * Get the front part of the email for first time login user creation
+ * @param email: string
+ */
+export const getUserNameFromEmail = (email: string): string => {
+  return email.split('@')[0];
+};
+
+export const isTokenExpired = (time: number): boolean => {
+  return new Date(time * 1000).getTime() < new Date().getTime();
+};

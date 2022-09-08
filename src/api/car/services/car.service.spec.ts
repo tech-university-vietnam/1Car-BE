@@ -1,4 +1,8 @@
-import { BadGatewayException, BadRequestException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -9,13 +13,13 @@ import * as path from 'path';
 import { DataSource } from 'typeorm';
 import { CarStatus } from '../../../contains';
 import { TestUtils } from '../../../utils/testUtils';
-import { CarController } from '../controllers/car.controller';
-import { CarFilterDto } from '../models/car.dto';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 import { Car } from '../models/car.entity';
 import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
 import { CarService } from './car.service';
+import { CarAdminFilterDto } from '../models/car.dto';
 
 jest.mock('axios');
 
@@ -44,6 +48,7 @@ describe('CarService', () => {
         TypeOrmModule.forFeature([Car]),
         TypeOrmModule.forFeature([CarAttribute]),
         TypeOrmModule.forFeature([CarAttributeType]),
+        TypeOrmModule.forFeature([BookedRecord]),
       ],
       providers: [CarService],
     }).compile();
@@ -63,6 +68,39 @@ describe('CarService', () => {
   afterEach(async () => {
     jest.clearAllMocks();
     await moduleRef.close();
+  });
+
+  it('should return the car id after creating the car, and can get all car attributes from car id', async () => {
+    const uuid_regex =
+      /^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$/;
+    const newCar = {
+      name: 'New Car 2',
+      description: 'New Car',
+      attributes: [
+        '3926cd59-cd4b-4bbc-821d-21800019780f',
+        'd97937f7-4407-4de0-8c99-89b0288cd051',
+      ],
+      numberOfTrips: 0,
+      numberOfKilometer: 0,
+      locationId: '',
+      pricePerDate: 100,
+      status: CarStatus.AVAILABLE,
+    };
+    const Car = await carService.createCar(newCar, []);
+    const carId = Car.id;
+    expect(carId).toEqual(expect.stringMatching(uuid_regex));
+    const attributes = await carService.getCarAttributes(carId);
+    console.log(attributes);
+    expect(attributes).toEqual(
+      expect.objectContaining({ brand: 'Pontiac', type: '350Z' }),
+    );
+    console.log(attributes);
+  });
+
+  it('should throw exception if car not found', async () => {
+    await expect(
+      carService.getCarAttributes('477004fa-bcb1-4abd-83ee-c99175532c17'),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('should return an array of cars', async () => {
@@ -346,5 +384,38 @@ describe('CarService', () => {
     const cars = await carService.getAllCar(filter);
 
     expect(cars).toHaveLength(0);
+  });
+
+  it('getCarAvailability', async () => {
+    const data = await carService.getCarAvailability(
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+      '1/1/2000',
+      '10/1/2000',
+    );
+    expect(data).toHaveProperty('isAvailable', false);
+  });
+
+  it('should return an array of car with length equal to limit', async () => {
+    const filter: CarAdminFilterDto = {
+      page: 1,
+      limit: 1,
+    };
+    const cars = await carService.getAllCarForAdmin(filter);
+    expect(cars.cars).toHaveLength(filter.limit);
+  });
+  it('should return different car when changing page', async () => {
+    const firstPageFilter: CarAdminFilterDto = {
+      page: 1,
+      limit: 1,
+    };
+    const secondPageFilter: CarAdminFilterDto = {
+      ...firstPageFilter,
+      page: firstPageFilter.page + 1,
+    };
+    const firstPage = await carService.getAllCarForAdmin(firstPageFilter);
+    const secondPage = await carService.getAllCarForAdmin(secondPageFilter);
+    expect(firstPage.cars).not.toBe(secondPage.cars);
+    expect(firstPage.totalPage).toBe(secondPage.totalPage);
+    expect(firstPage.totalRecords).toBe(secondPage.totalRecords);
   });
 });

@@ -1,9 +1,12 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { JwtAuthGuard } from './api/auth/guards/jwt-auth-guard';
+import { UserService } from './api/user/services/user.service';
+import { AuthService } from './api/auth/services/auth.service';
 
 async function bootstrap() {
   const app: NestExpressApplication = await NestFactory.create(AppModule, {
@@ -12,6 +15,14 @@ async function bootstrap() {
   const config: ConfigService = app.get(ConfigService);
   const port: number = config.get<number>('PORT');
   app.enableCors();
+  app.useGlobalGuards(
+    new JwtAuthGuard(
+      app.get(Reflector),
+      app.get(UserService),
+      app.get(AuthService),
+    ),
+  );
+  console.log(port);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 

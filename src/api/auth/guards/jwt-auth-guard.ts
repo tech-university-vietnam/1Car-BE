@@ -11,16 +11,15 @@ import { IS_PUBLIC_KEY } from '../../../decorators/public.decorator';
 import { Reflector } from '@nestjs/core';
 import { UserService } from '../../user/services/user.service';
 import {
-  checkUserHaveEnoughInfo,
   getAuthorizationFromCtx,
   getTokenFromAuthorizationString,
+  isTokenExpired,
 } from '../../../utils/helpers';
 import { ExceptionMessage } from '../constants';
 import { AuthService } from '../services/auth.service';
-import { CreateUserDto } from '../../../api/user/models/user.dto';
+import { IS_CREATE_USER_KEY } from '../../../decorators/createUser.decorator';
+import { User } from '../../user/models/user.entity';
 
-// Return unauthorized in case that is truly unauthorized,
-// Return Bad Request if there is missing info
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('package-jwt') {
   constructor(
@@ -31,67 +30,84 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
     super();
   }
 
+  private async processError(
+    ctx: ExecutionContext,
+    token: string,
+  ): Promise<{
+    err: any | null;
+    user: User | null;
+  }> {
+    let user = null;
+    const err = null;
+    if (!token) {
+      return {
+        err: new UnauthorizedException(),
+        user,
+      };
+    }
+
+    const request: Request = ctx.switchToHttp().getRequest();
+
+    // Check if there is a token that can be decoded
+    const decodedToken = this.authService.decodeTokenToObject(token);
+    if (!decodedToken)
+      return {
+        err: new UnauthorizedException(),
+        user,
+      };
+
+    // Check if token is expired or not
+    if (decodedToken['exp'] && isTokenExpired(decodedToken['exp'])) {
+      return {
+        err: new HttpException(
+          ExceptionMessage.TOKEN_EXPIRED,
+          HttpStatus.UNAUTHORIZED,
+        ),
+        user,
+      };
+    }
+
+    // Check if it is a valid user
+    const email = this.authService.fromTokenGetEmail(decodedToken);
+    user = await this.userService.getUserByEmail(email);
+    if (user) {
+      request.auth = {
+        token,
+        email,
+        userId: user.id,
+      };
+      return { err, user };
+    }
+
+    return {
+      err: new UnauthorizedException(),
+      user,
+    };
+  }
+
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
+    // If is public endpoint with @Public() decorator
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
       ctx.getHandler(),
       ctx.getClass(),
     ]);
-
     if (isPublic) return true;
-    else {
-      // If is not public then check the user
-      const token = getTokenFromAuthorizationString(
-        getAuthorizationFromCtx(ctx),
-      );
-      let err = null;
-      let user = null;
 
-      if (token) {
-        const request: Request = ctx.switchToHttp().getRequest();
-
-        const decodedToken = this.authService.decodeTokenToObject(token);
-        const email = this.authService.fromTokenGetEmail(decodedToken);
-        user = await this.userService.getUserByEmail(email);
-        if (user) {
-          request.auth = {
-            token,
-            email,
-            userId: user.id,
-          };
-        } else {
-          const isMissingInfo = checkUserHaveEnoughInfo(user);
-          if (isMissingInfo) {
-            err = new HttpException(
-              ExceptionMessage.USER_NEED_UPDATE_INFO,
-              HttpStatus.BAD_REQUEST,
-            );
-          } else {
-            this.userService.createUser(new CreateUserDto(email, email));
-            err = new HttpException(
-              ExceptionMessage.USER_NEED_UPDATE_INFO,
-              HttpStatus.BAD_REQUEST,
-            );
-          }
-        }
-
-        if (
-          new Date(decodedToken['exp'] * 1000).getTime() < new Date().getTime()
-        ) {
-          err = new HttpException(
-            ExceptionMessage.TOKEN_EXPIRED,
-            HttpStatus.UNAUTHORIZED,
-          );
-        }
-      } else {
-        err = new HttpException(
-          ExceptionMessage.UNAUTHORIZED,
-          HttpStatus.UNAUTHORIZED,
-        );
-      }
-
-      this.handleRequest(err, user);
-      return !!user;
+    // If is update endpoint from auth0 with @Update() decorator
+    const isCreateUser = this.reflector.getAllAndOverride<boolean>(
+      IS_CREATE_USER_KEY,
+      [ctx.getHandler(), ctx.getClass()],
+    );
+    const authorizationString = getAuthorizationFromCtx(ctx);
+    if (isCreateUser) {
+      return authorizationString === process.env.AUTH0_SECRET_TOKEN;
     }
+
+    // If is not public and update endpoint then check the user
+    const token = getTokenFromAuthorizationString(authorizationString);
+    const { err, user } = await this.processError(ctx, token);
+    this.handleRequest(err, user);
+    return !!user;
   }
 
   handleRequest(err, user) {

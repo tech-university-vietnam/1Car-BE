@@ -1,4 +1,4 @@
-import { CarStatus } from './../../../contains/index';
+import { CarStatus } from '../../../contains';
 import {
   BadGatewayException,
   BadRequestException,
@@ -10,13 +10,17 @@ import axios from 'axios';
 import * as FormData from 'form-data';
 import * as _ from 'lodash';
 import { FindManyOptions, In, Repository } from 'typeorm';
-import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
+import {
+  CarAdminFilterDto,
+  CarFilterDto,
+  CreateCarDTO,
+} from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import {
   CreateCarAttributeDto,
   CreateCarAttributeTypeDto,
 } from '../models/carAttribute.dto';
-import { CarAttribute } from './../models/carAttribute.entity';
+import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
 
 @Injectable()
@@ -74,27 +78,48 @@ export class CarService {
     if (typeof filter?.attribute == 'string') {
       filter.attribute = [filter.attribute];
     }
+    const limit = filter.limit || 10;
 
     const queryForAttribute =
-      filter.attribute?.length > 0
-        ? filter.attribute
-            .map((id) => `car_attribute.id = '${id}'`)
-            .join(' and ')
-        : '1 = 1';
+      filter.attribute?.length > 0 ? `car_attribute.id IN(:...ids)` : '1 = 1';
 
-    //TODO: check startDate & endDate here
+    const queryForHaving =
+      filter.attribute?.length > 0 ? `count(*) = :countAttributes` : '1 = 1';
+
+    const queryForRangeDate =
+      filter.startDate && filter.endDate
+        ? `NOT booked_record.bookTime && :date`
+        : `1 = 1`;
+    const bookingRange = `[${filter.startDate}, ${filter.endDate})`;
+
     const data = await this.carRepository
       .createQueryBuilder('car')
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
-      .orderBy('car.createdAt', 'DESC')
-      .leftJoinAndSelect('car.attributes', 'car_attribute')
-      .leftJoinAndSelect('car_attribute.type', 'type')
-      .andWhere(queryForAttribute)
-      .take(filter.limit || 10)
-      .skip((filter.limit || 10) * ((filter.page || 1) - 1))
+      .leftJoin('car.attributes', 'car_attribute')
+      .andWhere(queryForAttribute, { ids: filter.attribute })
+      .leftJoin('car.bookTime', 'booked_record')
+      .andWhere(queryForRangeDate, { date: bookingRange })
+      .groupBy('car.id')
+      .having(queryForHaving, {
+        countAttributes: filter.attribute?.length,
+      })
+      .take(limit)
+      .skip(limit * ((filter.page || 1) - 1))
       .getMany();
 
-    return data;
+    const result =
+      data.length > 0
+        ? await this.carRepository
+            .createQueryBuilder('car')
+            .orderBy('car.createdAt', 'DESC')
+            .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+            .leftJoinAndSelect('car.attributes', 'car_attribute')
+            .leftJoinAndSelect('car_attribute.type', 'type')
+            .leftJoinAndSelect('car.bookTime', 'booked_record')
+            .getMany()
+        : [];
+
+    return result;
   }
 
   public async getCarAttributes(id: string) {
@@ -102,21 +127,36 @@ export class CarService {
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
       .leftJoinAndSelect('car.attributes', 'car_attribute')
+      .leftJoinAndSelect('car_attribute.type', 'type')
       .getOne();
 
     if (!data) {
       throw new NotFoundException('Car not found');
     }
 
-    // return data.attributes.reduce((accum, attribute) => {
-    //   accum[attribute.type] = attribute.value;
-    //   return accum;
-    // }, {});
-    return null;
+    return data.attributes.reduce((accum, attribute) => {
+      accum[attribute.type.type] = attribute.value;
+      return accum;
+    }, {});
   }
 
-  public async checkCarAvailability(startDate, endDate) {
-    return false;
+  public async getCarAvailability(
+    id: string,
+    startDate: string,
+    endDate: string,
+  ) {
+    if (!startDate || !endDate) {
+      throw new BadRequestException('Start date and end date are required');
+    }
+    const bookingRange = `[${startDate}, ${endDate})`;
+    const availableCar = await this.carRepository
+      .createQueryBuilder('car')
+      .where('car.id = :id', { id })
+      .leftJoinAndSelect('car.bookTime', 'booked_record')
+      .andWhere(`NOT booked_record.bookTime && :date`, { date: bookingRange })
+      .getOne();
+    const isAvailable = availableCar !== null;
+    return { isAvailable };
   }
 
   public async uploadImage(file: Buffer) {
@@ -200,5 +240,35 @@ export class CarService {
     if (!type) throw new NotFoundException('Type not found');
 
     return type;
+  }
+
+  public async getAllCarForAdmin(
+    filter: CarAdminFilterDto,
+  ): Promise<{ totalRecords: number; cars: Car[]; totalPage: number }> {
+    const limit = filter.limit || 10;
+    const page = filter.page || 1;
+
+    const query = await this.carRepository.createQueryBuilder('car');
+
+    const data = await query
+      .take(limit)
+      .skip(limit * (page - 1))
+      .getMany();
+
+    const records = await query.getCount();
+    const numberOfPage = Math.floor(records / limit);
+    const totalPage = numberOfPage ? numberOfPage : 1;
+
+    const cars =
+      data.length > 0
+        ? await this.carRepository
+            .createQueryBuilder('car')
+            .orderBy('car.createdAt', 'DESC')
+            .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+            .leftJoinAndSelect('car.attributes', 'car_attribute')
+            .leftJoinAndSelect('car_attribute.type', 'type')
+            .getMany()
+        : [];
+    return { totalRecords: records, totalPage, cars };
   }
 }
