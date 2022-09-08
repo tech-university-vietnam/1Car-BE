@@ -56,7 +56,6 @@ export class UserController {
     return this.service.getUser(id);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiCreatedResponse({ type: Array<User> })
   public async getAllUser(): Promise<User[]> {
