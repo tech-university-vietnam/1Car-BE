@@ -110,7 +110,6 @@ export class PaymentService {
           newPayment.stripePaymentId = stripePaymentId;
           await manager.save(newPayment);
         });
-
         break;
       case 'payment_intent.payment_failed':
         const intentEvent = event.data.object as Stripe.PaymentIntent;
@@ -119,6 +118,13 @@ export class PaymentService {
           bookingStatus: bookingStatus.FAIL,
         });
         console.log(intentEvent.charges.data[0].failure_message);
+        break;
+      case 'checkout.session.expired':
+        const sessionEvent = event.data.object as Stripe.Checkout.Session;
+        const expiredBookingId = sessionEvent.metadata.bookingId;
+        await this.bookingRepository.update(expiredBookingId, {
+          bookingStatus: bookingStatus.FAIL,
+        });
         break;
       default:
         console.log(`Unhandled event type ${event.type}`);

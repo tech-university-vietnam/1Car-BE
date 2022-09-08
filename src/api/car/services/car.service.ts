@@ -118,12 +118,22 @@ export class CarService {
     }, {});
   }
 
-  public async checkCarAvailability(startDate, endDate) {
-    // const data = this.BookedRecordRepository.createQueryBuilder('booked_record')
-    //   .where('booked_record.bookedDate = :startDate', { startDate })
-    //   .getOne();
-    // return data;
-    return null;
+  public async getCarAvailability(
+    id: string,
+    startDate: string,
+    endDate: string,
+  ) {
+    const queryForRangeDate =
+      startDate && endDate ? `NOT booked_record.bookTime && :date` : `1 = 1`;
+    const bookingRange = `[${startDate}, ${endDate})`;
+    const availableCar = await this.carRepository
+      .createQueryBuilder('car')
+      .where('car.id = :id', { id })
+      .leftJoinAndSelect('car.bookTime', 'booked_record')
+      .andWhere(queryForRangeDate, { date: bookingRange })
+      .getOne();
+    const isAvailable = availableCar !== null;
+    return { isAvailable };
   }
 
   public async uploadImage(file: Buffer) {
