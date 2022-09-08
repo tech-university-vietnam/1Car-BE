@@ -78,6 +78,7 @@ export class CarService {
     if (typeof filter?.attribute == 'string') {
       filter.attribute = [filter.attribute];
     }
+    const limit = filter.limit || 10;
 
     const queryForAttribute =
       filter.attribute?.length > 0 ? `car_attribute.id IN(:...ids)` : '1 = 1';
@@ -102,8 +103,8 @@ export class CarService {
       .having(queryForHaving, {
         countAttributes: filter.attribute?.length,
       })
-      .take(filter.limit || 10)
-      .skip((filter.limit || 10) * ((filter.page || 1) - 1))
+      .take(limit)
+      .skip(limit * ((filter.page || 1) - 1))
       .getMany();
 
     const result =
@@ -230,23 +231,35 @@ export class CarService {
     return type;
   }
 
-  public async getAllCarForAdmin(filter: CarAdminFilterDto): Promise<Car[]> {
-    const data = await this.carRepository
+  public async getAllCarForAdmin(
+    filter: CarAdminFilterDto,
+  ): Promise<{ cars: Car[]; totalPage: number }> {
+    const limit = filter.limit || 10;
+    const page = filter.page || 1;
+
+    const query = await this.carRepository
       .createQueryBuilder('car')
-      .groupBy('car.id')
-      .take(filter.limit || 10)
-      .skip((filter.limit || 10) * ((filter.page || 1) - 1))
+      .groupBy('car.id');
+
+    const data = await query
+      .take(limit)
+      .skip(limit * (page - 1))
       .getMany();
 
-    return data.length > 0
-      ? await this.carRepository
-          .createQueryBuilder('car')
-          .orderBy('car.createdAt', 'DESC')
-          .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
-          .leftJoinAndSelect('car.attributes', 'car_attribute')
-          .leftJoinAndSelect('car_attribute.type', 'type')
-          .leftJoinAndSelect('car.bookTime', 'booked_record')
-          .getMany()
-      : [];
+    const records = await query.getCount();
+    const totalPage = Math.floor(records / limit) + 1;
+
+    const cars =
+      data.length > 0
+        ? await this.carRepository
+            .createQueryBuilder('car')
+            .orderBy('car.createdAt', 'DESC')
+            .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+            .leftJoinAndSelect('car.attributes', 'car_attribute')
+            .leftJoinAndSelect('car_attribute.type', 'type')
+            .leftJoinAndSelect('car.bookTime', 'booked_record')
+            .getMany()
+        : [];
+    return { totalPage, cars };
   }
 }

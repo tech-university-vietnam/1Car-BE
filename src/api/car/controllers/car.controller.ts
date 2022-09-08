@@ -39,6 +39,12 @@ export class CarController {
   private readonly service: CarService;
 
   @Public()
+  @Get('/admin')
+  public getAllCarForAdmin(@Query() filter: CarAdminFilterDto): Promise<any> {
+    return this.service.getAllCarForAdmin(filter);
+  }
+
+  @Public()
   @Get('/attribute/type')
   @ApiResponse({ type: Array<{ type: string; name: string }> })
   getAttributeType() {
@@ -102,10 +108,5 @@ export class CarController {
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
-  }
-
-  @Get('/admin')
-  public getAllCarForAdmin(@Query() filter: CarAdminFilterDto): Promise<Car[]> {
-    return this.service.getAllCarForAdmin(filter);
   }
 }

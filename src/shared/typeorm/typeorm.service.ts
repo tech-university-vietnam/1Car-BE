@@ -1,6 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { TypeOrmOptionsFactory, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -17,8 +17,8 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.config.get<string>('DATABASE_PASSWORD'),
       autoLoadEntities: true,
       migrations: ['dist/migrations/*.{ts,js}'],
-      //migrationsTableName: 'typeorm_migrations',
-      //migrationsRun: true,
+      migrationsTableName: 'typeorm_migrations',
+      migrationsRun: false,
       logger: 'file',
       synchronize: true, // never use TRUE in production!
     };
