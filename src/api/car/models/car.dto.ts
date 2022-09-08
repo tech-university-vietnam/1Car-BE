@@ -1,6 +1,5 @@
 import { Type } from 'class-transformer';
 import {
-  IsArray,
   IsDateString,
   IsIn,
   IsInt,
@@ -34,11 +33,15 @@ export class CreateCarDTO {
   @IsNumber()
   pricePerDate: number;
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
   @IsOptional()
   numberOfTrips: number;
 
-  @IsNumber()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
   @IsOptional()
   numberOfKilometer: number;
 
@@ -47,6 +50,7 @@ export class CreateCarDTO {
   locationId: string;
 
   @IsFile()
+  @IsOptional()
   @MaxFileSize(1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
   @HasMimeType(['image/jpeg', 'image/png'], { each: true })
   images: MemoryStoredFile;
@@ -83,4 +87,18 @@ export class CarFilterDto {
   @IsString({ each: true })
   @IsOptional()
   attribute?: string[];
+}
+
+export class CarAdminFilterDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  page?: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  limit?: number;
 }

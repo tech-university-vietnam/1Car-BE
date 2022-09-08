@@ -1,4 +1,5 @@
 export default function mapFilesToArray(images: any) {
+  if (!images) return [];
   const files: any[] = [];
   let currentImage = images;
   let nestedImage = null;

@@ -12,10 +12,10 @@ import {
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Booking } from '../models/booking.entity';
 import { BookingService } from '../services/booking.service';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth-guard';
 import { Request } from 'express';
 import { CreateBookingDTO } from '../models/booking.dto';
 import { UpdateBookingDTO } from '../models/updateBookingDTO';
+import { JwtAuthGuard } from '../../../api/auth/guards/jwt-auth-guard';
 
 @Controller('booking')
 @ApiTags('booking')
@@ -45,8 +45,6 @@ export class BookingController {
   ) {
     return this.service.updateBooking(id, body);
   }
-
-  @UseGuards(JwtAuthGuard)
   @Post()
   @ApiCreatedResponse({ type: Booking })
   public async createBooking(

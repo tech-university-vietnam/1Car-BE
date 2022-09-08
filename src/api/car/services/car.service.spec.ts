@@ -19,6 +19,7 @@ import { CreateCarAttributeDto } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
 import { CarService } from './car.service';
+import { CarAdminFilterDto } from '../models/car.dto';
 
 jest.mock('axios');
 
@@ -392,5 +393,29 @@ describe('CarService', () => {
       '10/1/2000',
     );
     expect(data).toHaveProperty('isAvailable', false);
+  });
+
+  it('should return an array of car with length equal to limit', async () => {
+    const filter: CarAdminFilterDto = {
+      page: 1,
+      limit: 1,
+    };
+    const cars = await carService.getAllCarForAdmin(filter);
+    expect(cars.cars).toHaveLength(filter.limit);
+  });
+  it('should return different car when changing page', async () => {
+    const firstPageFilter: CarAdminFilterDto = {
+      page: 1,
+      limit: 1,
+    };
+    const secondPageFilter: CarAdminFilterDto = {
+      ...firstPageFilter,
+      page: firstPageFilter.page + 1,
+    };
+    const firstPage = await carService.getAllCarForAdmin(firstPageFilter);
+    const secondPage = await carService.getAllCarForAdmin(secondPageFilter);
+    expect(firstPage.cars).not.toBe(secondPage.cars);
+    expect(firstPage.totalPage).toBe(secondPage.totalPage);
+    expect(firstPage.totalRecords).toBe(secondPage.totalRecords);
   });
 });
