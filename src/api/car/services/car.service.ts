@@ -233,13 +233,11 @@ export class CarService {
 
   public async getAllCarForAdmin(
     filter: CarAdminFilterDto,
-  ): Promise<{ cars: Car[]; totalPage: number }> {
+  ): Promise<{ totalRecords: number; cars: Car[]; totalPage: number }> {
     const limit = filter.limit || 10;
     const page = filter.page || 1;
 
-    const query = await this.carRepository
-      .createQueryBuilder('car')
-      .groupBy('car.id');
+    const query = await this.carRepository.createQueryBuilder('car');
 
     const data = await query
       .take(limit)
@@ -247,7 +245,8 @@ export class CarService {
       .getMany();
 
     const records = await query.getCount();
-    const totalPage = Math.floor(records / limit) + 1;
+    const numberOfPage = Math.floor(records / limit);
+    const totalPage = numberOfPage ? numberOfPage : 1;
 
     const cars =
       data.length > 0
@@ -257,9 +256,8 @@ export class CarService {
             .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
             .leftJoinAndSelect('car.attributes', 'car_attribute')
             .leftJoinAndSelect('car_attribute.type', 'type')
-            .leftJoinAndSelect('car.bookTime', 'booked_record')
             .getMany()
         : [];
-    return { totalPage, cars };
+    return { totalRecords: records, totalPage, cars };
   }
 }
