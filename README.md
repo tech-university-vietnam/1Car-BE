@@ -77,8 +77,10 @@ This will proxy to http://localhost:8080, our backend app.
 
 ## Get started with ultrahook
 
-Save the Api key:
-```echo "api_key: HPVB6Nap29id7WFMSagiLYCekexfKEcQ" > ~/.ultrahook```
+Register your link [here](https://www.ultrahook.com/register)
+
+Save the Api key get from ultrahook after create:
+```echo "api_key: apikey" > ~/.ultrahook```
 
 And install the UltraHook client:
 ```gem install ultrahook```
