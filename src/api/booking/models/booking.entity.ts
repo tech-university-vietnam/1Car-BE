@@ -61,7 +61,7 @@ export class Booking {
   @ApiProperty()
   public bookingStatus: bookingStatus;
 
-  @Column({ type: 'enum', enum: pickUpStatus, default: pickUpStatus.PICKUP })
+  @Column({ type: 'enum', enum: pickUpStatus, default: pickUpStatus.PENDING })
   @ApiProperty()
   public pickUpStatus: pickUpStatus;
 
