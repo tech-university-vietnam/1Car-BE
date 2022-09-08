@@ -95,7 +95,7 @@ describe('PaymentService', () => {
       .mockImplementation(() => expect.anything());
 
     await paymentService.createCheckoutSession(bookingRequest, userRequest);
-    const newBookings = await bookingService.getBookingsByUserId(
+    const newBookings = await bookingService.getCurrentUserBookings(
       bookingRequest.userId,
     );
 

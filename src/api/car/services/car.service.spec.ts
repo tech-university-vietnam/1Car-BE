@@ -387,8 +387,12 @@ describe('CarService', () => {
   });
 
   it('getCarAvailability', async () => {
-    const data = await carService.checkCarAvailability('1/1/2000', '10/1/2000');
-    expect(data).toBeNull();
+    const data = await carService.getCarAvailability(
+      '477004fa-bcb1-4abd-83ee-c99175532c17',
+      '1/1/2000',
+      '10/1/2000',
+    );
+    expect(data).toHaveProperty('isAvailable', false);
   });
 
   it('should return an array of car with length equal to limit', async () => {

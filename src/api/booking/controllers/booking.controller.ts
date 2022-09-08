@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
 import { Booking } from '../models/booking.entity';
@@ -14,12 +15,18 @@ import { BookingService } from '../services/booking.service';
 import { Request } from 'express';
 import { CreateBookingDTO } from '../models/booking.dto';
 import { UpdateBookingDTO } from '../models/updateBookingDTO';
+import { JwtAuthGuard } from '../../../api/auth/guards/jwt-auth-guard';
 
 @Controller('booking')
 @ApiTags('booking')
 export class BookingController {
   @Inject(BookingService)
   private readonly service: BookingService;
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  public getCurrentUserBookings(@Req() req: Request): Promise<Booking[]> {
+    return this.service.getCurrentUserBookings(req.auth.userId);
+  }
 
   @Get(':id')
   public getBooking(@Param('id') id: string): Promise<Booking> {

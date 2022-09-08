@@ -29,7 +29,7 @@ export class BookingService {
     return await this.repository.findOneBy({ id: id });
   }
 
-  public async getBookingsByUserId(userId: string): Promise<Booking[]> {
+  public async getCurrentUserBookings(userId: string): Promise<Booking[]> {
     return await this.repository.findBy({ userId });
   }
 
