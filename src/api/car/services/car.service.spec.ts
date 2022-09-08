@@ -391,15 +391,15 @@ describe('CarService', () => {
     expect(data).toBeNull();
   });
 
-  it('should return an array of car with length equal to limit', () => {
+  it('should return an array of car with length equal to limit', async () => {
     const filter: CarAdminFilterDto = {
       page: 1,
-      limit: 10,
+      limit: 1,
     };
-    const cars = null;
-    expect(cars).toHaveLength(filter.limit);
+    const cars = await carService.getAllCarForAdmin(filter);
+    expect(cars.cars).toHaveLength(filter.limit);
   });
-  it('should return different car when changing page', () => {
+  it('should return different car when changing page', async () => {
     const firstPageFilter: CarAdminFilterDto = {
       page: 1,
       limit: 1,
@@ -408,8 +408,10 @@ describe('CarService', () => {
       ...firstPageFilter,
       page: firstPageFilter.page + 1,
     };
-    const firstPage = null;
-    const secondPage = null;
-    expect(firstPage).not.toBe(secondPage);
+    const firstPage = await carService.getAllCarForAdmin(firstPageFilter);
+    const secondPage = await carService.getAllCarForAdmin(secondPageFilter);
+    expect(firstPage.cars).not.toBe(secondPage.cars);
+    expect(firstPage.totalPage).toBe(secondPage.totalPage);
+    expect(firstPage.totalRecords).toBe(secondPage.totalRecords);
   });
 });
