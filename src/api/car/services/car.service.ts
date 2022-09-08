@@ -123,14 +123,15 @@ export class CarService {
     startDate: string,
     endDate: string,
   ) {
-    const queryForRangeDate =
-      startDate && endDate ? `NOT booked_record.bookTime && :date` : `1 = 1`;
+    if (!startDate || !endDate) {
+      throw new BadRequestException('Start date and end date are required');
+    }
     const bookingRange = `[${startDate}, ${endDate})`;
     const availableCar = await this.carRepository
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
       .leftJoinAndSelect('car.bookTime', 'booked_record')
-      .andWhere(queryForRangeDate, { date: bookingRange })
+      .andWhere(`NOT booked_record.bookTime && :date`, { date: bookingRange })
       .getOne();
     const isAvailable = availableCar !== null;
     return { isAvailable };
