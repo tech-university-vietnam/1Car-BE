@@ -111,6 +111,7 @@ export class CarController {
     return this.service.getCarAttributes(id);
   }
 
+  @Public()
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
