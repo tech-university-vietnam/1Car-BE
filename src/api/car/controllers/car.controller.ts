@@ -17,7 +17,6 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { FormDataRequest } from 'nestjs-form-data';
-import { CarAttributeType } from '../../../contains';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
 import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
 import { Car } from '../models/car.entity';
@@ -27,6 +26,7 @@ import {
 } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarService } from '../services/car.service';
+import { Public } from '../../../decorators/public.decorator';
 
 @Controller('car')
 @ApiTags('car')
@@ -34,12 +34,14 @@ export class CarController {
   @Inject(CarService)
   private readonly service: CarService;
 
+  @Public()
   @Get('/attribute/type')
   @ApiResponse({ type: Array<{ type: string; name: string }> })
   getAttributeType() {
     return this.service.getAllAttributeType();
   }
 
+  @Public()
   @Get('/attribute')
   getAttribute() {
     return this.service.getAttribute();
@@ -51,12 +53,14 @@ export class CarController {
     return this.service.uploadImage(file.buffer);
   }
 
+  @Public()
   @Post('/attribute/type')
   @ApiCreatedResponse({ type: CarAttribute })
   createAttributeType(@Body() data: CreateCarAttributeTypeDto) {
     return this.service.createAttributeType(data);
   }
 
+  @Public()
   @Post('/attribute')
   @ApiCreatedResponse({ type: CarAttribute })
   createAttribute(@Body() data: CreateCarAttributeDto) {
@@ -78,14 +82,19 @@ export class CarController {
     return createdCar;
   }
 
+  @Public()
   @Get(':id')
   public getCar(@Param('id') id: string): Promise<Car> {
     return this.service.getCar(id);
   }
+
+  @Public()
   @Get(':id/attributes')
   public getCarAttributes(@Param('id') id: string) {
     return this.service.getCarAttributes(id);
   }
+
+  @Public()
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
