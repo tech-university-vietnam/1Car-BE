@@ -18,7 +18,11 @@ import {
 } from '@nestjs/swagger';
 import { FormDataRequest } from 'nestjs-form-data';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
-import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
+import {
+  CarAdminFilterDto,
+  CarFilterDto,
+  CreateCarDTO,
+} from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import {
   CreateCarAttributeDto,
@@ -98,5 +102,10 @@ export class CarController {
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
+  }
+
+  @Get('/admin')
+  public getAllCarForAdmin(@Query() filter: CarAdminFilterDto): Promise<Car[]> {
+    return this.service.getAllCarForAdmin(filter);
   }
 }

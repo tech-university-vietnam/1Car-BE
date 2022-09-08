@@ -1,4 +1,4 @@
-import { CarStatus } from './../../../contains/index';
+import { CarStatus } from '../../../contains';
 import {
   BadGatewayException,
   BadRequestException,
@@ -10,13 +10,17 @@ import axios from 'axios';
 import * as FormData from 'form-data';
 import * as _ from 'lodash';
 import { FindManyOptions, In, Repository } from 'typeorm';
-import { CarFilterDto, CreateCarDTO } from '../models/car.dto';
+import {
+  CarAdminFilterDto,
+  CarFilterDto,
+  CreateCarDTO,
+} from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import {
   CreateCarAttributeDto,
   CreateCarAttributeTypeDto,
 } from '../models/carAttribute.dto';
-import { CarAttribute } from './../models/carAttribute.entity';
+import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
 
 @Injectable()
@@ -224,5 +228,25 @@ export class CarService {
     if (!type) throw new NotFoundException('Type not found');
 
     return type;
+  }
+
+  public async getAllCarForAdmin(filter: CarAdminFilterDto): Promise<Car[]> {
+    const data = await this.carRepository
+      .createQueryBuilder('car')
+      .groupBy('car.id')
+      .take(filter.limit || 10)
+      .skip((filter.limit || 10) * ((filter.page || 1) - 1))
+      .getMany();
+
+    return data.length > 0
+      ? await this.carRepository
+          .createQueryBuilder('car')
+          .orderBy('car.createdAt', 'DESC')
+          .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+          .leftJoinAndSelect('car.attributes', 'car_attribute')
+          .leftJoinAndSelect('car_attribute.type', 'type')
+          .leftJoinAndSelect('car.bookTime', 'booked_record')
+          .getMany()
+      : [];
   }
 }

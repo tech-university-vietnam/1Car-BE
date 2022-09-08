@@ -22,6 +22,7 @@ async function bootstrap() {
       app.get(AuthService),
     ),
   );
+  console.log(port);
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
