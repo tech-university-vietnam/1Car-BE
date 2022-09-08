@@ -65,6 +65,7 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
             email,
             userId: user.id,
           };
+          return true;
           const isMissingInfo = checkUserHaveEnoughInfo(user);
           // If it is not from the update endpoint and user is missing data
           if (!isUpdate && !isMissingInfo) {
