@@ -92,7 +92,10 @@ describe('CarService', () => {
     const attributes = await carService.getCarAttributes(carId);
     console.log(attributes);
     expect(attributes).toEqual(
-      expect.objectContaining({ brand: 'Pontiac', type: '350Z' }),
+      expect.objectContaining({
+        description: '',
+        specs: { brand: 'Pontiac', type: '350Z' },
+      }),
     );
     console.log(attributes);
   });

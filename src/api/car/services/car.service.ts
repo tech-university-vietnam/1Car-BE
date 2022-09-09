@@ -135,10 +135,15 @@ export class CarService {
       throw new NotFoundException('Car not found');
     }
 
-    return data.attributes.reduce((accum, attribute) => {
+    const result = data.attributes.reduce((accum, attribute) => {
       accum[attribute.type.type] = attribute.value;
       return accum;
     }, {});
+    const { description, ...otherSpecs } = { description: '', ...result };
+    return {
+      description,
+      specs: otherSpecs,
+    };
   }
 
   public async getCarAvailability(
