@@ -97,8 +97,12 @@ export class CarService {
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .leftJoin('car.attributes', 'car_attribute')
       .andWhere(queryForAttribute, { ids: filter.attribute })
-      .leftJoin('car.bookTime', 'booked_record')
-      .andWhere(queryForRangeDate, { date: bookingRange })
+      .leftJoin(
+        'car.bookTime',
+        'booked_record',
+        `booked_record.bookTime <@ :date`,
+        { date: bookingRange },
+      )
       .groupBy('car.id')
       .having(queryForHaving, {
         countAttributes: filter.attribute?.length,
@@ -152,8 +156,12 @@ export class CarService {
     const availableCar = await this.carRepository
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
-      .leftJoinAndSelect('car.bookTime', 'booked_record')
-      .andWhere(`NOT booked_record.bookTime && :date`, { date: bookingRange })
+      .leftJoinAndSelect(
+        'car.bookTime',
+        'booked_record',
+        `booked_record.bookTime <@ :date`,
+        { date: bookingRange },
+      )
       .getOne();
     const isAvailable = availableCar !== null;
     return { isAvailable };
