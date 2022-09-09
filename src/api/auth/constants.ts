@@ -6,4 +6,5 @@ export const ExceptionMessage = {
   USER_NOT_FOUND: 'User not found',
   USER_NEED_UPDATE_INFO: 'User need to update more information',
   TOKEN_EXPIRED: 'Token expired',
+  USER_IS_NOT_ADMIN: 'User is not admin',
 };
