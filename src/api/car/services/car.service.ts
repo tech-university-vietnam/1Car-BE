@@ -88,8 +88,8 @@ export class CarService {
 
     const queryForRangeDate =
       filter.startDate && filter.endDate
-        ? `NOT booked_record.bookTime && :date`
-        : `1 = 1`;
+        ? '((booked_record.id IS NOT NULL AND (NOT booked_record.bookTime && :date))'
+        : '((1=1)';
     const bookingRange = `[${filter.startDate}, ${filter.endDate})`;
 
     const data = await this.carRepository
@@ -97,9 +97,9 @@ export class CarService {
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .leftJoin('car.attributes', 'car_attribute')
       .andWhere(queryForAttribute, { ids: filter.attribute })
-      .leftJoin('car.bookTime', 'booked_record', queryForRangeDate, {
-        date: bookingRange,
-      })
+      .leftJoin('car.bookTime', 'booked_record')
+      .andWhere(queryForRangeDate, { date: bookingRange })
+      .orWhere('booked_record.id IS NULL)')
       .groupBy('car.id')
       .having(queryForHaving, {
         countAttributes: filter.attribute?.length,
@@ -153,13 +153,14 @@ export class CarService {
     const availableCar = await this.carRepository
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
-      .leftJoinAndSelect(
-        'car.bookTime',
-        'booked_record',
-        `booked_record.bookTime <@ :date`,
+      .leftJoinAndSelect('car.bookTime', 'booked_record')
+      .andWhere(
+        '((booked_record.id IS NOT NULL AND (NOT booked_record.bookTime && :date))',
         { date: bookingRange },
       )
+      .orWhere('booked_record.id IS NULL)')
       .getOne();
+
     const isAvailable = availableCar !== null;
     return { isAvailable };
   }
