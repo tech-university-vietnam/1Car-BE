@@ -97,12 +97,9 @@ export class CarService {
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .leftJoin('car.attributes', 'car_attribute')
       .andWhere(queryForAttribute, { ids: filter.attribute })
-      .leftJoin(
-        'car.bookTime',
-        'booked_record',
-        `booked_record.bookTime <@ :date`,
-        { date: bookingRange },
-      )
+      .leftJoin('car.bookTime', 'booked_record', queryForRangeDate, {
+        date: bookingRange,
+      })
       .groupBy('car.id')
       .having(queryForHaving, {
         countAttributes: filter.attribute?.length,
