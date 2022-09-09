@@ -7,7 +7,13 @@ import {
   Req,
   Res,
 } from '@nestjs/common';
-import { ApiCreatedResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CreateCheckoutSessionDTO } from '../models/payment.dto';
 import { PaymentService } from '../services/payment.service';
@@ -20,7 +26,10 @@ export class PaymentController {
   private readonly service: PaymentService;
 
   @Post('/checkout')
-  @ApiCreatedResponse()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create checkout session' })
+  @ApiUnauthorizedResponse()
+  @ApiForbiddenResponse()
   public async createCheckoutSession(
     @Body() body: CreateCheckoutSessionDTO,
     @Res() res: Response,
@@ -31,6 +40,7 @@ export class PaymentController {
   }
 
   @Public()
+  @ApiOperation({ summary: 'Endpoint to receive webhook from Stripe' })
   @Post('/webhook')
   public async handleIntentWebhook(@Req() request: RawBodyRequest<Request>) {
     return this.service.handleIntentWebhook(request);

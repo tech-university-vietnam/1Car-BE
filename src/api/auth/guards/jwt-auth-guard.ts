@@ -18,7 +18,8 @@ import {
 import { ExceptionMessage } from '../constants';
 import { AuthService } from '../services/auth.service';
 import { IS_CREATE_USER_KEY } from '../../../decorators/createUser.decorator';
-import { User } from '../../user/models/user.entity';
+import { User, UserRole } from '../../user/models/user.entity';
+import { IS_ADMIN_ENDPOINT_KEY } from '../../../decorators/admin.decorator';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('package-jwt') {
@@ -39,6 +40,12 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
   }> {
     let user = null;
     const err = null;
+
+    const isAdminEndpoint = this.reflector.getAllAndOverride<boolean>(
+      IS_ADMIN_ENDPOINT_KEY,
+      [ctx.getHandler(), ctx.getClass()],
+    );
+
     if (!token) {
       return {
         err: new UnauthorizedException(),
@@ -76,6 +83,18 @@ export class JwtAuthGuard extends AuthGuard('package-jwt') {
         email,
         userId: user.id,
       };
+      if (isAdminEndpoint) {
+        // Check role of user to see if it is UserRole.Admin
+        if (user.userRole !== UserRole.ADMIN) {
+          return {
+            err: new HttpException(
+              ExceptionMessage.USER_IS_NOT_ADMIN,
+              HttpStatus.UNAUTHORIZED,
+            ),
+            user,
+          };
+        }
+      }
       return { err, user };
     }
 
