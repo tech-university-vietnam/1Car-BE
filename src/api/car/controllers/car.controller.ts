@@ -24,6 +24,7 @@ import {
 import { FormDataRequest } from 'nestjs-form-data';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
 import {
+  CarAdminDTO,
   CarAdminFilterDto,
   CarFilterDto,
   CreateCarDTO,
@@ -60,6 +61,7 @@ export class CarController {
     description: 'Enter the max number of car you want to show on a page',
     required: false,
   })
+  @ApiDefaultResponse({ type: CarAdminDTO })
   @ApiUnauthorizedResponse()
   @ApiForbiddenResponse()
   public getAllCarForAdmin(@Query() filter: CarAdminFilterDto): Promise<any> {
@@ -135,6 +137,7 @@ export class CarController {
   @Public()
   @ApiOperation({ summary: 'Get car availability' })
   @Get(':id/available')
+  @ApiDefaultResponse({ type: Boolean })
   public getCarAvailability(
     @Param('id') id: string,
     @Query('startDate') startDate: string,

@@ -17,6 +17,7 @@ import {
 } from 'nestjs-form-data';
 import { CarStatus } from '../../../contains';
 import { ApiProperty } from '@nestjs/swagger';
+import { Car } from './car.entity';
 
 export class CreateCarDTO {
   @ApiProperty()
@@ -122,4 +123,15 @@ export class CarAdminFilterDto {
   @Min(0)
   @IsOptional()
   limit?: number;
+}
+
+export class CarAdminDTO {
+  @ApiProperty()
+  totalRecords: number;
+
+  @ApiProperty()
+  cars: Car[];
+
+  @ApiProperty()
+  totalPage: number;
 }
