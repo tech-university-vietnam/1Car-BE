@@ -17,7 +17,11 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserByAdminDto,
+  UpdateUserDto,
+} from '../models/user.dto';
 import { User } from '../models/user.entity';
 import { UserService } from '../services/user.service';
 import { Request } from 'express';
@@ -57,6 +61,15 @@ export class UserController {
     }
   }
 
+  @Patch(':id/admin')
+  @ApiBearerAuth()
+  @AdminEndpoint()
+  public async updateInfoUsingAdminAccount(
+    @Body() body: UpdateUserByAdminDto,
+  ): Promise<User> {
+    return await this.service.updateUserInfoUsingAdmin(body);
+  }
+
   @Get('validate')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Validate user token and return user information' })
@@ -85,6 +98,7 @@ export class UserController {
     return this.service.getUser(id);
   }
 
+  @AdminEndpoint()
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all user in the database' })

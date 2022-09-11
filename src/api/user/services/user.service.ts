@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserByAdminDto,
+  UpdateUserDto,
+} from '../models/user.dto';
 import { User, UserRole } from '../models/user.entity';
 import { getUserNameFromEmail } from '../../../utils/helpers';
 
@@ -62,5 +66,18 @@ export class UserService {
       user.dateOfBirth = body.dateOfBirth;
       return await this.repository.save(user);
     }
+  }
+
+  public async updateUserInfoUsingAdmin(
+    body: UpdateUserByAdminDto,
+  ): Promise<User> {
+    const updateUser = await this.getUser(body.id);
+    for (const [key, value] of Object.entries(body)) {
+      if (key !== 'id') {
+        updateUser[key] = value;
+      }
+    }
+    await this.repository.save(updateUser);
+    return updateUser;
   }
 }
