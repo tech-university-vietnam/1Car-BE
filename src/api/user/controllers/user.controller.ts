@@ -9,6 +9,7 @@ import {
   Req,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiDefaultResponse,
@@ -65,6 +66,10 @@ export class UserController {
   @Patch(':id/admin')
   @ApiBearerAuth()
   @AdminEndpoint()
+  @ApiBadRequestResponse()
+  @ApiBody({ type: UpdateUserByAdminDto })
+  @ApiDefaultResponse({ type: User })
+  @ApiOperation({ summary: 'Update user information using admin account' })
   public async updateInfoUsingAdminAccount(
     @Body() body: UpdateUserByAdminDto | UpdateUserToAdminDto,
   ): Promise<User> {
