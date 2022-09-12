@@ -67,3 +67,9 @@ export class UpdateUserByAdminDto {
   @ApiProperty()
   phoneNumber?: string;
 }
+
+export class DeleteUserDto {
+  @IsUUID()
+  @ApiProperty()
+  id: string;
+}

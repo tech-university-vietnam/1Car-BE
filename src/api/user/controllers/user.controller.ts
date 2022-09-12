@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -113,6 +114,14 @@ export class UserController {
   @ApiForbiddenResponse()
   public async getAllUser(): Promise<User[]> {
     return this.service.getAllUser();
+  }
+
+  @AdminEndpoint()
+  @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete this user in the database' })
+  public async deleteUser(@Param() params: { id: string }) {
+    return this.service.deleteUser(params.id);
   }
 
   // This is a key-needed api

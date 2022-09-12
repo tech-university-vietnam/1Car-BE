@@ -81,4 +81,11 @@ export class UserService {
     await this.repository.save(updateUser);
     return updateUser;
   }
+
+  public async deleteUser(id: string) {
+    const updateUser = await this.getUser(id);
+    updateUser.isDeleted = true;
+    await this.repository.save(updateUser);
+    return updateUser;
+  }
 }
