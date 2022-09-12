@@ -21,6 +21,7 @@ import {
   CreateUserDto,
   UpdateUserByAdminDto,
   UpdateUserDto,
+  UpdateUserToAdminDto,
 } from '../models/user.dto';
 import { User } from '../models/user.entity';
 import { UserService } from '../services/user.service';
@@ -65,7 +66,7 @@ export class UserController {
   @ApiBearerAuth()
   @AdminEndpoint()
   public async updateInfoUsingAdminAccount(
-    @Body() body: UpdateUserByAdminDto,
+    @Body() body: UpdateUserByAdminDto | UpdateUserToAdminDto,
   ): Promise<User> {
     return await this.service.updateUserInfoUsingAdmin(body);
   }

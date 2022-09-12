@@ -40,20 +40,30 @@ export class UpdateUserDto {
   }
 }
 
+export class UpdateUserToAdminDto {
+  @IsUUID()
+  @ApiProperty()
+  id: string;
+
+  @IsString()
+  @ApiProperty()
+  userRole?: string;
+}
+
 export class UpdateUserByAdminDto {
   @IsUUID()
   @ApiProperty()
   id: string;
 
+  @IsString()
   @ApiProperty()
   name?: string;
 
+  @IsString()
   @ApiProperty()
   dateOfBirth?: string;
 
+  @IsString()
   @ApiProperty()
   phoneNumber?: string;
-
-  @ApiProperty()
-  userRole?: string;
 }

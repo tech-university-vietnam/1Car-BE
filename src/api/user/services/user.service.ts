@@ -5,6 +5,7 @@ import {
   CreateUserDto,
   UpdateUserByAdminDto,
   UpdateUserDto,
+  UpdateUserToAdminDto,
 } from '../models/user.dto';
 import { User, UserRole } from '../models/user.entity';
 import { getUserNameFromEmail } from '../../../utils/helpers';
@@ -69,7 +70,7 @@ export class UserService {
   }
 
   public async updateUserInfoUsingAdmin(
-    body: UpdateUserByAdminDto,
+    body: UpdateUserByAdminDto | UpdateUserToAdminDto,
   ): Promise<User> {
     const updateUser = await this.getUser(body.id);
     for (const [key, value] of Object.entries(body)) {
