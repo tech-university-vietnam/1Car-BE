@@ -16,11 +16,15 @@ export class UserService {
   private repository: Repository<User>;
 
   public getAllUser(): Promise<User[]> {
-    return this.repository.find();
+    return this.repository.find({
+      where: {
+        isDeleted: false,
+      },
+    });
   }
 
   public getUser(id: string): Promise<User> {
-    return this.repository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id, isDeleted: false });
   }
 
   public createUser(body: CreateUserDto): Promise<User> {
