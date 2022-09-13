@@ -1,47 +1,42 @@
 import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { TestUtils } from '../../../utils/testUtils';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
 import { User, UserRole } from '../models/user.entity';
 import { UserService } from './user.service';
+import utils from '../../../utils/utils';
 
 describe('UserService', () => {
-  let moduleRef: TestingModule;
   let userService: UserService;
   let testUtils: TestUtils;
-
+  let userRepository: Repository<User>;
   beforeEach(async () => {
-    jest.clearAllMocks();
-    moduleRef = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env.test' }),
-        TypeOrmModule.forRoot({
-          type: 'postgres',
-          host: process.env.DATABASE_HOST,
-          port: Number(process.env.DATABASE_PORT),
-          username: process.env.DATABASE_USER,
-          password: process.env.DATABASE_PASSWORD,
-          database: process.env.DATABASE_NAME,
-          autoLoadEntities: true,
-          synchronize: true,
-        }),
-        TypeOrmModule.forFeature([User]),
+    const users: User[] = utils.loadJson('user') as User[];
+    const user: User = users.find((user) => user.email === 'test@mail.com');
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UserService,
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOneBy: jest.fn(() => Promise.resolve(user)),
+            findOne: jest.fn(() => Promise.resolve([user])),
+            find: jest.fn(() => Promise.resolve(users)),
+            create: jest.fn(() => Promise.resolve(user)),
+            save: jest.fn(() => Promise.resolve(user)),
+          },
+        },
       ],
-      providers: [UserService],
     }).compile();
 
-    userService = moduleRef.get(UserService);
-    testUtils = new TestUtils(moduleRef.get(DataSource));
-
-    await testUtils.cleanAll(['user']);
-    await testUtils.loadAll(['user']);
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    userService = module.get(UserService);
   });
 
   afterEach(async () => {
     jest.clearAllMocks();
-    await moduleRef.close();
   });
 
   it('should create a user', async () => {
@@ -79,16 +74,33 @@ describe('UserService', () => {
   });
 
   it('test create admin with email', async () => {
-    const email = 'admin@mail.com';
-    const admin = await userService.createAdmin(email);
+    const mockedAdmin = new User();
+    const email = 'admin@email.com';
+    mockedAdmin.userRole = UserRole.ADMIN;
+    mockedAdmin.email = email;
+    jest.spyOn(userRepository, 'save').mockImplementation(() => {
+      return Promise.resolve(mockedAdmin);
+    });
+    const admin: User = await userService.createAdmin(email);
     expect(admin).toBeInstanceOf(User);
     expect(admin.userRole).toBe(UserRole.ADMIN);
   });
 
   it('test update while no user', async () => {
-    const dto = new UpdateUserDto('name', '1990-01-01', '32902xxxx');
-    const email = 'randomemail@email.com';
-    const user = await userService.updateUser(dto, email);
+    const mockedUser = new User();
+    mockedUser.name = 'name';
+    mockedUser.dateOfBirth = '1990-01-01';
+    mockedUser.phoneNumber = '32902xxxx';
+    jest.spyOn(userService, 'getUserByEmail').mockImplementation(() => {
+      return Promise.resolve(null);
+    });
+    jest.spyOn(userRepository, 'create').mockImplementation(() => {
+      return mockedUser;
+    });
+    const user = await userService.updateUser(
+      expect.anything(),
+      expect.anything(),
+    );
     expect(user).toBeInstanceOf(User);
     expect(user.dateOfBirth).toBeDefined();
     expect(user.phoneNumber).toBeDefined();
