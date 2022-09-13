@@ -13,20 +13,6 @@ export class TestUtils {
     this.databaseService = databaseService;
   }
 
-  async shutdownServer(server) {
-    await server.httpServer.close();
-    await this.closeDbConnection();
-  }
-
-  async closeDbConnection() {
-    await this.databaseService.destroy();
-  }
-
-  async reloadFixtures(entities) {
-    await this.cleanAll(entities);
-    await this.loadAll(entities);
-  }
-
   async cleanAll(entities) {
     try {
       for (const entity of entities) {
