@@ -150,13 +150,39 @@ describe('PaymentService', () => {
     ).toBe(bookingStatus.SUCCESS);
   });
 
-  it('handleIntentWebhook -> should update booking status when payment faled', async () => {
+  it('handleIntentWebhook -> should update booking status when payment failed', async () => {
     const mockedEventRequest = utils.loadJson(
       'intent_failed_request',
     ) as RawBodyRequest<Request>;
     const mockedEvent = utils.loadJson('intent_failed_webhook') as Stripe.Event;
 
     const intentEvent = mockedEvent.data.object as Stripe.PaymentIntent;
+    const testBooking = await bookingService.createBooking(
+      bookingRequest,
+      userRequest,
+    );
+    intentEvent.metadata.bookingId = testBooking.id;
+    jest.spyOn(stripeService, 'constructEvent').mockReturnValue(mockedEvent);
+
+    expect(
+      (await bookingService.getBooking(testBooking.id)).bookingStatus,
+    ).toBe(bookingStatus.PENDING);
+
+    await paymentService.handleIntentWebhook(mockedEventRequest);
+
+    expect(await bookingService.getBooking(testBooking.id)).not.toBeNull();
+    expect(
+      (await bookingService.getBooking(testBooking.id)).bookingStatus,
+    ).toBe(bookingStatus.FAIL);
+  });
+
+  it('handleIntentWebhook -> should update booking status when checkout session expires', async () => {
+    const mockedEventRequest = utils.loadJson(
+      'intent_failed_request',
+    ) as RawBodyRequest<Request>;
+    const mockedEvent = utils.loadJson('checkout_failed_event') as Stripe.Event;
+
+    const intentEvent = mockedEvent.data.object as Stripe.Checkout.Session;
     const testBooking = await bookingService.createBooking(
       bookingRequest,
       userRequest,

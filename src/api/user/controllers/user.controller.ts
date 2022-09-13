@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Inject,
   Param,
@@ -9,6 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiDefaultResponse,
@@ -17,7 +19,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserByAdminDto,
+  UpdateUserDto,
+  UpdateUserToAdminDto,
+} from '../models/user.dto';
 import { User } from '../models/user.entity';
 import { UserService } from '../services/user.service';
 import { Request } from 'express';
@@ -57,6 +64,19 @@ export class UserController {
     }
   }
 
+  @Patch(':id/admin')
+  @ApiBearerAuth()
+  @AdminEndpoint()
+  @ApiBadRequestResponse()
+  @ApiBody({ type: UpdateUserByAdminDto })
+  @ApiDefaultResponse({ type: User })
+  @ApiOperation({ summary: 'Update user information using admin account' })
+  public async updateInfoUsingAdminAccount(
+    @Body() body: UpdateUserByAdminDto | UpdateUserToAdminDto,
+  ): Promise<User> {
+    return await this.service.updateUserInfoUsingAdmin(body);
+  }
+
   @Get('validate')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Validate user token and return user information' })
@@ -85,6 +105,7 @@ export class UserController {
     return this.service.getUser(id);
   }
 
+  @AdminEndpoint()
   @Get()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all user in the database' })
@@ -93,6 +114,14 @@ export class UserController {
   @ApiForbiddenResponse()
   public async getAllUser(): Promise<User[]> {
     return this.service.getAllUser();
+  }
+
+  @AdminEndpoint()
+  @Delete(':id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete this user in the database' })
+  public async deleteUser(@Param() params: { id: string }) {
+    return this.service.deleteUser(params.id);
   }
 
   // This is a key-needed api

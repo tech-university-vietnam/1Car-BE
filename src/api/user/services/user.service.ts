@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto, UpdateUserDto } from '../models/user.dto';
+import {
+  CreateUserDto,
+  UpdateUserByAdminDto,
+  UpdateUserDto,
+  UpdateUserToAdminDto,
+} from '../models/user.dto';
 import { User, UserRole } from '../models/user.entity';
 import { getUserNameFromEmail } from '../../../utils/helpers';
 
@@ -11,11 +16,15 @@ export class UserService {
   private repository: Repository<User>;
 
   public getAllUser(): Promise<User[]> {
-    return this.repository.find();
+    return this.repository.find({
+      where: {
+        isDeleted: false,
+      },
+    });
   }
 
   public getUser(id: string): Promise<User> {
-    return this.repository.findOneBy({ id: id });
+    return this.repository.findOneBy({ id: id, isDeleted: false });
   }
 
   public createUser(body: CreateUserDto): Promise<User> {
@@ -62,5 +71,25 @@ export class UserService {
       user.dateOfBirth = body.dateOfBirth;
       return await this.repository.save(user);
     }
+  }
+
+  public async updateUserInfoUsingAdmin(
+    body: UpdateUserByAdminDto | UpdateUserToAdminDto,
+  ): Promise<User> {
+    const updateUser = await this.getUser(body.id);
+    for (const [key, value] of Object.entries(body)) {
+      if (key !== 'id') {
+        updateUser[key] = value;
+      }
+    }
+    await this.repository.save(updateUser);
+    return updateUser;
+  }
+
+  public async deleteUser(id: string) {
+    const updateUser = await this.getUser(id);
+    updateUser.isDeleted = true;
+    await this.repository.save(updateUser);
+    return updateUser;
   }
 }

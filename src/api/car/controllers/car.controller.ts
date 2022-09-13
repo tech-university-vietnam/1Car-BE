@@ -4,6 +4,7 @@ import {
   Get,
   Inject,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -28,6 +29,7 @@ import {
   CarAdminFilterDto,
   CarFilterDto,
   CreateCarDTO,
+  UpdateCarDTO,
 } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import {
@@ -197,5 +199,15 @@ export class CarController {
   @Get()
   public getAllCar(@Query() filter: CarFilterDto): Promise<Car[]> {
     return this.service.getAllCar(filter);
+  }
+
+  @Patch(':id')
+  @FormDataRequest()
+  @ApiOperation({ summary: 'Update a car' })
+  public async updateCar(
+    @Param() params: { id: string },
+    @Body() body: UpdateCarDTO,
+  ): Promise<Car> {
+    return this.service.updateCar(params.id, body);
   }
 }
