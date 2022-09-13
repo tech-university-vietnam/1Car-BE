@@ -14,6 +14,7 @@ import {
   CarAdminFilterDto,
   CarFilterDto,
   CreateCarDTO,
+  UpdateCarDTO,
 } from '../models/car.dto';
 import { Car } from '../models/car.entity';
 import {
@@ -22,6 +23,7 @@ import {
 } from '../models/carAttribute.dto';
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
+import mapFilesToArray from '../../../utils/mapFilesToArray';
 
 @Injectable()
 export class CarService {
@@ -281,5 +283,37 @@ export class CarService {
             .getMany()
         : [];
     return { totalRecords: records, totalPage, cars };
+  }
+
+  public async updateCar(id: string, body: UpdateCarDTO) {
+    const updateCar = await this.getCar(id);
+
+    // Update attributes list
+    if (typeof body.attributes == 'string') body.attributes = [body.attributes];
+    updateCar.attributes = await this.getAttributesFromIds(body.attributes);
+
+    // Update images list
+    const files = mapFilesToArray(body.images);
+    const uploadResult = [];
+    const images = files.map((item) => item.buffer);
+    for (const image of images) {
+      const result = await this.uploadImage(image);
+      uploadResult.push(result.data?.display_url);
+    }
+    updateCar.images = [...updateCar.images, ...uploadResult];
+
+    // Update other attributes
+    for (const prop of Object.keys(body)) {
+      if (
+        prop !== 'images' &&
+        prop !== 'existedImage' &&
+        prop !== 'attributes'
+      ) {
+        updateCar[prop] = body[prop];
+      }
+    }
+
+    await this.carRepository.save(updateCar);
+    return updateCar;
   }
 }

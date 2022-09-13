@@ -135,3 +135,59 @@ export class CarAdminDTO {
   @ApiProperty()
   totalPage: number;
 }
+
+export class UpdateCarDTO {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
+  description: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsIn([CarStatus.AVAILABLE, CarStatus.UN_AVAILABLE])
+  status: CarStatus;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsNumber()
+  pricePerDate: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  numberOfTrips: number;
+
+  @ApiProperty()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  numberOfKilometer: number;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional() //locationId of google places api
+  locationId: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString({ each: true })
+  existedImages: string[];
+
+  @ApiProperty()
+  @IsFile()
+  @IsOptional()
+  @MaxFileSize(1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
+  @HasMimeType(['image/jpeg', 'image/png'], { each: true })
+  images: MemoryStoredFile;
+
+  @ApiProperty()
+  @IsUUID('all', { each: true })
+  attributes: string[];
+}
