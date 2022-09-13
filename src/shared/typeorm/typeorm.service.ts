@@ -21,6 +21,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       migrationsRun: false,
       logger: 'file',
       synchronize: true, // never use TRUE in production!
+      ssl: true,
     };
   }
 }
