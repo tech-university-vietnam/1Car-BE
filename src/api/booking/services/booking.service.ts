@@ -29,8 +29,27 @@ export class BookingService {
     return await this.repository.findOneBy({ id: id });
   }
 
-  public async getCurrentUserBookings(userId: string): Promise<Booking[]> {
-    return await this.repository.findBy({ userId });
+  public async getCurrentUserBookings(
+    userId: string,
+  ): Promise<BookingWithUserDto[]> {
+    const result: BookingWithUserDto[] = [];
+
+    const user = await this.userService.getUser(userId);
+    const bookings = await this.repository.findBy({ userId });
+
+    await Promise.all(
+      bookings.map(async (item) => {
+        const car = await this.carService.getCar(item.carId);
+        const itemResult = {
+          ...item,
+          user,
+          car,
+        };
+        result.push(itemResult);
+      }),
+    );
+
+    return result;
   }
 
   public async getAllBooking(): Promise<BookingWithUserDto[]> {

@@ -1,4 +1,4 @@
-import { IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateBookingDTO {
@@ -14,7 +14,8 @@ export class CreateBookingDTO {
   @ApiProperty()
   public receivedDateTime: string;
 
-  @IsUUID()
+  @IsString()
+  @IsOptional()
   @ApiProperty()
   public pickUpLocationId: string;
 }
