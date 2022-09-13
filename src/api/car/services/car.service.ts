@@ -24,11 +24,15 @@ import {
 import { CarAttribute } from '../models/carAttribute.entity';
 import { CarAttributeType } from '../models/carAttributeType.entity';
 import mapFilesToArray from '../../../utils/mapFilesToArray';
+import { BookedRecord } from '../../booking/models/bookedRecord.entity';
 
 @Injectable()
 export class CarService {
   @InjectRepository(Car)
   private readonly carRepository: Repository<Car>;
+
+  @InjectRepository(BookedRecord)
+  private readonly bookedRecordRepository: Repository<BookedRecord>;
 
   @InjectRepository(CarAttribute)
   private readonly carAttributeRepository: Repository<CarAttribute>;
@@ -117,7 +121,6 @@ export class CarService {
             filter.startDate,
             filter.endDate,
           );
-
           if (isAvailable.isAvailable) {
             return availableCar.push(item);
           }
@@ -174,15 +177,15 @@ export class CarService {
     const availableCar = await this.carRepository
       .createQueryBuilder('car')
       .where('car.id = :id', { id })
-      .leftJoinAndSelect('car.bookTime', 'booked_record')
-      .andWhere(
-        '((booked_record.id IS NOT NULL AND (NOT booked_record.bookTime && :date))',
-        { date: bookingRange },
-      )
-      .orWhere('booked_record.id IS NULL)')
-      .getMany();
-
-    const isAvailable = availableCar.length == 0;
+      .innerJoinAndSelect('car.bookTime', 'booked_record')
+      .getOne();
+    if (!availableCar) return { isAvailable: true };
+    const bookedRecord = await this.bookedRecordRepository
+      .createQueryBuilder('booked_record')
+      .where('booked_record.carId = :id', { id })
+      .andWhere('booked_record.bookTime && :date', { date: bookingRange })
+      .getOne();
+    const isAvailable = bookedRecord ? false : true;
     return { isAvailable };
   }
 
