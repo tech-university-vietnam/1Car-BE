@@ -15,6 +15,6 @@ export class CreateCheckoutSessionDTO {
   public receivedDateTime: string;
 
   @ApiProperty()
-  @IsUUID()
+  @IsString()
   public pickUpLocationId: string;
 }
