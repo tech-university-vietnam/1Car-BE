@@ -97,23 +97,42 @@ export class CarService {
       .where('car.status = :status', { status: CarStatus.AVAILABLE })
       .leftJoin('car.attributes', 'car_attribute')
       .andWhere(queryForAttribute, { ids: filter.attribute })
-      .leftJoin('car.bookTime', 'booked_record')
-      .andWhere(queryForRangeDate, { date: bookingRange })
-      .orWhere('booked_record.id IS NULL)')
-      .groupBy('car.id')
       .having(queryForHaving, {
         countAttributes: filter.attribute?.length,
       })
+      .groupBy('car.id')
       .take(limit)
       .skip(limit * ((filter.page || 1) - 1))
       .getMany();
 
+    const availableCar = [];
+
+    await Promise.all(
+      data.map(async (item) => {
+        if (filter.startDate && filter.endDate) {
+          const isAvailable = await this.getCarAvailability(
+            item.id,
+            filter.startDate,
+            filter.endDate,
+          );
+
+          if (isAvailable.isAvailable) {
+            return availableCar.push(item);
+          }
+        } else {
+          return availableCar.push(item);
+        }
+      }),
+    );
+
     const result =
-      data.length > 0
+      availableCar.length > 0
         ? await this.carRepository
             .createQueryBuilder('car')
             .orderBy('car.createdAt', 'DESC')
-            .where('car.id IN (:...ids)', { ids: data.map((item) => item.id) })
+            .where('car.id IN (:...ids)', {
+              ids: availableCar.map((item) => item.id),
+            })
             .leftJoinAndSelect('car.attributes', 'car_attribute')
             .leftJoinAndSelect('car_attribute.type', 'type')
             .leftJoinAndSelect('car.bookTime', 'booked_record')
@@ -135,15 +154,10 @@ export class CarService {
       throw new NotFoundException('Car not found');
     }
 
-    const result = data.attributes.reduce((accum, attribute) => {
+    return data.attributes.reduce((accum, attribute) => {
       accum[attribute.type.type] = attribute.value;
       return accum;
     }, {});
-    const { description, ...otherSpecs } = { description: '', ...result };
-    return {
-      description,
-      specs: otherSpecs,
-    };
   }
 
   public async getCarAvailability(
@@ -164,9 +178,9 @@ export class CarService {
         { date: bookingRange },
       )
       .orWhere('booked_record.id IS NULL)')
-      .getOne();
+      .getMany();
 
-    const isAvailable = availableCar !== null;
+    const isAvailable = availableCar.length == 0;
     return { isAvailable };
   }
 
