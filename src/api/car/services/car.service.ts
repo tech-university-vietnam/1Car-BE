@@ -198,7 +198,7 @@ export class CarService {
       });
 
       const response = await axios.post(
-        `https://api.imgbb.com/1/upload&key=${process.env.UPLOAD_API_KEY}`,
+        `https://api.imgbb.com/1/upload?key=${process.env.UPLOAD_API_KEY}`,
         form,
       );
 
