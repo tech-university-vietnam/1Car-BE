@@ -17,6 +17,11 @@ describe('BookingService', () => {
     description: 'New Car',
     pricePerDate: 100,
   };
+  const user = {
+    id: '3e306bb8-ac97-4c25-8f7a-44d11abcb1c1',
+    name: 'Macaque, japanese',
+    email: 'giannini0@gnu.org',
+  };
   const booking = {
     id: '40952ee9-64b3-4bce-95fc-10f27339d2a3',
     userId: '63c4f298-a75e-424e-998e-55f396a97d61',
@@ -25,12 +30,9 @@ describe('BookingService', () => {
     receivedDateTime: new Date('2018-01-25T08:54:45.000Z'),
     totalPrice: 4000,
     pickUpLocationId: '2711ad44-d7a2-4a3a-bcbe-c8d520d4ef6e',
+    user: user,
+    car: car,
   } as any;
-  const user = {
-    id: '3e306bb8-ac97-4c25-8f7a-44d11abcb1c1',
-    name: 'Macaque, japanese',
-    email: 'giannini0@gnu.org',
-  };
   const request = {
     auth: {
       userId: '3e306bb8-ac97-4c25-8f7a-44d11abcb1c1',
@@ -81,6 +83,7 @@ describe('BookingService', () => {
 
   it('get current user bookings -> should return bookings', async () => {
     const result = await service.getCurrentUserBookings(user.id);
+    console.log(result);
     expect(result).toEqual([booking]);
   });
 

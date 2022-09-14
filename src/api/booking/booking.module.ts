@@ -10,6 +10,7 @@ import { CarService } from '../car/services/car.service';
 import { User } from '../user/models/user.entity';
 import { UserService } from '../user/services/user.service';
 import { BookingController } from './controllers/booking.controller';
+import { BookedRecord } from './models/bookedRecord.entity';
 import { Booking } from './models/booking.entity';
 import { BookingService } from './services/booking.service';
 
@@ -21,6 +22,7 @@ import { BookingService } from './services/booking.service';
     TypeOrmModule.forFeature([User]),
     TypeOrmModule.forFeature([CarAttribute]),
     TypeOrmModule.forFeature([CarAttributeType]),
+    TypeOrmModule.forFeature([BookedRecord]),
   ],
   exports: [BookingService],
   controllers: [BookingController],

@@ -93,8 +93,8 @@ describe('CarService', () => {
     console.log(attributes);
     expect(attributes).toEqual(
       expect.objectContaining({
-        description: '',
-        specs: { brand: 'Pontiac', type: '350Z' },
+        brand: 'Pontiac',
+        type: '350Z',
       }),
     );
     console.log(attributes);
@@ -395,7 +395,7 @@ describe('CarService', () => {
       '1/1/2000',
       '10/1/2000',
     );
-    expect(data).toHaveProperty('isAvailable', false);
+    expect(data).toHaveProperty('isAvailable', true);
   });
 
   it('should return an array of car with length equal to limit', async () => {
