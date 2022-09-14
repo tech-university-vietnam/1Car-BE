@@ -30,7 +30,7 @@ import { UserService } from '../services/user.service';
 import { Request } from 'express';
 import { CreateUser } from '../../../decorators/createUser.decorator';
 import { AdminEndpoint } from '../../../decorators/admin.decorator';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from '../../../decorators/public.decorator';
 
 @Controller('user')
 @ApiTags('user')
