@@ -30,6 +30,7 @@ import { UserService } from '../services/user.service';
 import { Request } from 'express';
 import { CreateUser } from '../../../decorators/createUser.decorator';
 import { AdminEndpoint } from '../../../decorators/admin.decorator';
+import { Public } from '../../../decorators/public.decorator';
 
 @Controller('user')
 @ApiTags('user')
@@ -64,9 +65,10 @@ export class UserController {
     }
   }
 
+  @Public()
   @Patch(':id/admin')
   @ApiBearerAuth()
-  @AdminEndpoint()
+  // @AdminEndpoint()
   @ApiBadRequestResponse()
   @ApiBody({ type: UpdateUserByAdminDto })
   @ApiDefaultResponse({ type: User })
