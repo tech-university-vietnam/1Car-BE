@@ -61,7 +61,7 @@ export class CreateCarDTO {
   @ApiProperty()
   @IsFile()
   @IsOptional()
-  @MaxFileSize(1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
+  @MaxFileSize(5 * 1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
   @HasMimeType(['image/jpeg', 'image/png'], { each: true })
   images: MemoryStoredFile;
 
@@ -183,7 +183,7 @@ export class UpdateCarDTO {
   @ApiProperty()
   @IsFile()
   @IsOptional()
-  @MaxFileSize(1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
+  @MaxFileSize(5 * 1e6, { each: true }) //size by bytes 1e6 bytes = 1mb
   @HasMimeType(['image/jpeg', 'image/png'], { each: true })
   images: MemoryStoredFile;
 

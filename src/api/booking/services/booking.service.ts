@@ -53,7 +53,9 @@ export class BookingService {
   }
 
   public async getAllBooking(): Promise<BookingWithUserDto[]> {
-    const bookings = await this.repository.find();
+    const bookings = await this.repository.find({
+      order: { createdAt: 'DESC' },
+    });
 
     const result: BookingWithUserDto[] = [];
     await Promise.all(

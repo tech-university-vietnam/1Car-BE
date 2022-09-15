@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
-
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   @Inject(ConfigService)
   private readonly config: ConfigService;
-
   public createTypeOrmOptions(): TypeOrmModuleOptions {
+    const IS_PRODUCTION: boolean =
+      this.config.get<string>('DEVELOPMENT_STAGE') == 'PRODUCTION';
     return {
       type: 'postgres',
       host: this.config.get<string>('DATABASE_HOST'),
@@ -20,7 +20,12 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       migrationsTableName: 'typeorm_migrations',
       migrationsRun: false,
       logger: 'file',
-      synchronize: true, // never use TRUE in production!
+      synchronize: !IS_PRODUCTION,
+      ...(IS_PRODUCTION && {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
     };
   }
 }

@@ -198,7 +198,7 @@ export class CarService {
       });
 
       const response = await axios.post(
-        `https://api.imgbb.com/1/upload?expiration=600&key=${process.env.UPLOAD_API_KEY}`,
+        `https://api.imgbb.com/1/upload?key=${process.env.UPLOAD_API_KEY}`,
         form,
       );
 
@@ -317,7 +317,7 @@ export class CarService {
       const result = await this.uploadImage(image);
       uploadResult.push(result.data?.display_url);
     }
-    updateCar.images = [...updateCar.images, ...uploadResult];
+    updateCar.images = [...body.existedImages, ...uploadResult];
 
     // Update other attributes
     for (const prop of Object.keys(body)) {
